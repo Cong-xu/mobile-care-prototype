@@ -73,9 +73,9 @@
           <span>当前角色</span>
           <strong id="roleName">客服主管</strong>
           <div class="role-tabs" aria-label="角色切换">
-            <button class="active" data-role="客服主管">客服</button>
-            <button data-role="服务商调度">服务商</button>
-            <button data-role="服务工程师">工程师</button>
+            <button class="active" data-role-key="customerService" data-role="客服主管">客服</button>
+            <button data-role-key="serviceProvider" data-role="服务商调度">服务商</button>
+            <button data-role-key="engineer" data-role="服务工程师">工程师</button>
           </div>
         </div>
       </aside>
@@ -85,6 +85,7 @@
           <div>
             <p class="eyebrow" id="viewEyebrow">工作台</p>
             <h2 id="viewTitle">服务响应总览</h2>
+            <p class="panel-subcopy" id="roleScope">客服聚焦案例受理与服务诉求转工单。</p>
           </div>
           <div class="top-actions">
             <button class="ghost-btn" id="quickCaseBtn"><i data-lucide="plus"></i>新建案例</button>
@@ -99,6 +100,13 @@
             <article class="metric blue"><span>待派工</span><strong id="metricDispatch">9</strong><small>到店 4 / 上门 5</small></article>
             <article class="metric green"><span>已关闭</span><strong id="metricClosed">11</strong><small>平均评分 4.7</small></article>
           </div>
+          <section class="panel role-brief">
+            <div class="panel-head">
+              <h3 id="roleBriefTitle">客服工作焦点</h3>
+              <span class="status-pill" id="roleBriefTag">案例受理</span>
+            </div>
+            <div class="brief-grid" id="roleBriefGrid"></div>
+          </section>
           <div class="split-layout">
             <section class="panel">
               <div class="panel-head">

@@ -1,4 +1,5 @@
 const state = {
+  currentRole: "customerService",
   selectedOrderId: "WO-260528-001",
   assignment: "direct",
   caseFilter: "全部",
@@ -117,6 +118,63 @@ const titles = {
   reviews: ["闭环管理", "评价查看"]
 };
 
+const roleConfigs = {
+  customerService: {
+    label: "客服主管",
+    shortLabel: "客服",
+    defaultView: "cases",
+    allowedViews: ["dashboard", "cases", "orders", "reviews"],
+    scope: "客服聚焦案例受理、诉求判断与售后案例转服务工单。",
+    briefTitle: "客服工作焦点",
+    briefTag: "案例受理",
+    briefCards: [
+      ["统一受理案例", "录入投诉、咨询、售后案例，确保客户信息、设备信息和问题描述完整。"],
+      ["判断服务路径", "对售后案例判断是否需要转工单，对投诉与咨询安排回访或解释。"],
+      ["推动服务闭环", "跟踪工单结果和客户反馈，把前台受理和后续服务接起来。"] 
+    ],
+    quickActions: [
+      { id: "quickCaseBtn", label: "新建案例", view: "cases", hidden: false, primary: false },
+      { id: "quickOrderBtn", label: "手动建工单", view: "orders", hidden: false, primary: true }
+    ]
+  },
+  serviceProvider: {
+    label: "服务商调度",
+    shortLabel: "服务商",
+    defaultView: "dispatch",
+    allowedViews: ["dashboard", "orders", "dispatch", "reviews"],
+    scope: "服务商聚焦接单、派单和服务资源调度，确保工单顺畅流转到工程师。",
+    briefTitle: "服务商工作焦点",
+    briefTag: "接单派单",
+    briefCards: [
+      ["查看工单池", "优先处理待派工和高优先级订单，核对服务方式、预约时间与区域归属。"],
+      ["派单给工程师", "根据技能、区域和负荷把工单分发给合适工程师，并补充派单说明。"],
+      ["跟进执行状态", "掌握服务中工单进展，必要时协调改约、换人或补件。"] 
+    ],
+    quickActions: [
+      { id: "quickCaseBtn", label: "查看工单池", view: "orders", hidden: false, primary: false },
+      { id: "quickOrderBtn", label: "进入派工台", view: "dispatch", hidden: false, primary: true }
+    ]
+  },
+  engineer: {
+    label: "服务工程师",
+    shortLabel: "工程师",
+    defaultView: "execution",
+    allowedViews: ["dashboard", "orders", "execution", "reviews"],
+    scope: "工程师聚焦执行工单、填写故障与备件信息，并完成服务回传。",
+    briefTitle: "工程师工作焦点",
+    briefTag: "服务执行",
+    briefCards: [
+      ["处理待办工单", "查看已分配工单的预约、设备和故障背景，准备上门或到店服务。"],
+      ["记录故障与备件", "在现场填写检测结论、使用备件、费用归属和处理说明。"],
+      ["完成工单回传", "确认服务结果、提交完工记录并闭环到客户评价。"] 
+    ],
+    quickActions: [
+      { id: "quickCaseBtn", label: "查看工单", view: "orders", hidden: false, primary: false },
+      { id: "quickOrderBtn", label: "处理工单", view: "execution", hidden: false, primary: true }
+    ]
+  }
+};
+
 const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => Array.from(document.querySelectorAll(selector));
 
@@ -130,20 +188,160 @@ function showToast(message) {
 
 function uid(prefix) {
   const serial = String(Math.floor(Math.random() * 900) + 100);
-  return `${prefix}-260528-${serial}`;
+  return `${prefix}-260531-${serial}`;
+}
+
+function getRoleConfig() {
+  return roleConfigs[state.currentRole];
+}
+
+function getCurrentView() {
+  const active = $(".view.active");
+  return active ? active.id.replace("View", "") : "dashboard";
 }
 
 function switchView(view) {
+  const config = getRoleConfig();
+  const nextView = config.allowedViews.includes(view) ? view : config.defaultView;
   $$(".view").forEach((item) => item.classList.remove("active"));
-  $(`#${view}View`).classList.add("active");
-  $$(".nav-item").forEach((item) => item.classList.toggle("active", item.dataset.view === view));
-  $("#viewEyebrow").textContent = titles[view][0];
-  $("#viewTitle").textContent = titles[view][1];
+  $(`#${nextView}View`).classList.add("active");
+  $$(".nav-item").forEach((item) => item.classList.toggle("active", item.dataset.view === nextView));
+  $("#viewEyebrow").textContent = titles[nextView][0];
+  $("#viewTitle").textContent = titles[nextView][1];
 }
 
 function pill(status) {
   const tone = status.includes("关闭") ? "green" : status.includes("派工") || status.includes("服务中") ? "blue" : status.includes("待") ? "warn" : "";
   return `<span class="status-pill ${tone}">${status}</span>`;
+}
+
+function getRoleMetrics() {
+  const waitingCases = state.cases.filter((item) => item.status === "待转工单").length;
+  const followCases = state.cases.filter((item) => item.status === "客服跟进").length;
+  const waitingOrders = state.orders.filter((item) => item.status === "待派工").length;
+  const activeOrders = state.orders.filter((item) => item.status === "服务中").length;
+  const closedOrders = state.orders.filter((item) => item.status === "已关闭").length;
+  const partsPending = state.orders.filter((item) => item.status === "服务中" && (!item.part || item.part === "无备件")).length;
+
+  if (state.currentRole === "serviceProvider") {
+    return [
+      { label: "待接单工单", value: waitingOrders, note: "优先处理高优先级与上门服务", tone: "" },
+      { label: "待派发工程师", value: waitingOrders, note: "确认区域、技能和预约时间", tone: "warn" },
+      { label: "服务中", value: activeOrders, note: "跟进执行进度与改约需求", tone: "blue" },
+      { label: "已回传关闭", value: closedOrders, note: "查看服务结果与客户评价", tone: "green" }
+    ];
+  }
+
+  if (state.currentRole === "engineer") {
+    return [
+      { label: "待处理工单", value: activeOrders, note: "按预约顺序推进上门或到店服务", tone: "" },
+      { label: "待备件确认", value: partsPending, note: "补充备件、费用和故障结论", tone: "warn" },
+      { label: "待完工回传", value: activeOrders, note: "填写处理说明并准备闭单", tone: "blue" },
+      { label: "今日完成", value: closedOrders, note: "完成后可查看用户评价", tone: "green" }
+    ];
+  }
+
+  return [
+    { label: "今日新案例", value: 28 + state.cases.length - 3, note: "投诉 6 / 咨询 11 / 售后 11", tone: "" },
+    { label: "待转工单", value: waitingCases, note: "建议优先处理高价值客户", tone: "warn" },
+    { label: "待客服跟进", value: followCases, note: "投诉与咨询需安排回访或解释", tone: "blue" },
+    { label: "已形成工单", value: state.orders.filter((item) => item.source !== "手动创建").length, note: "售后案例已进入服务链路", tone: "green" }
+  ];
+}
+
+function renderMetrics() {
+  const metrics = getRoleMetrics();
+  const cards = $$(".metrics-grid .metric");
+  metrics.forEach((metric, index) => {
+    const card = cards[index];
+    card.className = `metric${metric.tone ? ` ${metric.tone}` : ""}`;
+    card.innerHTML = `<span>${metric.label}</span><strong>${metric.value}</strong><small>${metric.note}</small>`;
+  });
+}
+
+function renderRoleBrief() {
+  const config = getRoleConfig();
+  $("#roleScope").textContent = config.scope;
+  $("#roleBriefTitle").textContent = config.briefTitle;
+  $("#roleBriefTag").textContent = config.briefTag;
+  $("#roleBriefGrid").innerHTML = config.briefCards.map(([title, desc]) => `
+    <article class="brief-card">
+      <strong>${title}</strong>
+      <p>${desc}</p>
+    </article>
+  `).join("");
+}
+
+function getTaskItems() {
+  const waitingCases = state.cases.filter((item) => item.status === "待转工单").length;
+  const followCases = state.cases.filter((item) => item.status === "客服跟进").length;
+  const waitingOrders = state.orders.filter((item) => item.status === "待派工").length;
+  const activeOrders = state.orders.filter((item) => item.status === "服务中").length;
+  const closedOrders = state.orders.filter((item) => item.status === "已关闭").length;
+  const partsPending = state.orders.filter((item) => item.status === "服务中" && (!item.part || item.part === "无备件")).length;
+
+  if (state.currentRole === "serviceProvider") {
+    return [
+      ["待接单工单", waitingOrders, "orders"],
+      ["待派工给工程师", waitingOrders, "dispatch"],
+      ["查看已关闭评价", closedOrders, "reviews"]
+    ];
+  }
+
+  if (state.currentRole === "engineer") {
+    return [
+      ["待处理工单", activeOrders, "execution"],
+      ["填写故障与备件", partsPending, "execution"],
+      ["查看已完成工单", closedOrders, "reviews"]
+    ];
+  }
+
+  return [
+    ["售后案例待转工单", waitingCases, "cases"],
+    ["投诉咨询待跟进", followCases, "cases"],
+    ["查看已关闭评价", closedOrders, "reviews"]
+  ];
+}
+
+function renderTasks() {
+  $("#taskList").innerHTML = getTaskItems().map(([label, count, view]) => `
+    <button class="task-item" data-jump="${view}">
+      <span><strong>${label}</strong><span>点击进入处理队列</span></span>
+      <span class="status-pill ${count ? "warn" : "green"}">${count}</span>
+    </button>
+  `).join("");
+}
+
+function getVisibleOrders() {
+  if (state.currentRole === "engineer") {
+    return state.orders.filter((item) => item.status !== "待派工");
+  }
+  return state.orders;
+}
+
+function getOrderAction(item) {
+  if (item.status === "已关闭") {
+    return `<button class="mini-btn" data-review-order="${item.id}">查看评价</button>`;
+  }
+
+  if (state.currentRole === "engineer") {
+    if (item.status === "服务中") {
+      return `<button class="mini-btn" data-use-order="${item.id}">处理工单</button>`;
+    }
+    return `<span class="status-pill warn">等待派工</span>`;
+  }
+
+  if (item.status === "待派工") {
+    const label = state.currentRole === "serviceProvider" ? "接单派工" : "进入派工";
+    return `<button class="mini-btn" data-select-order="${item.id}">${label}</button>`;
+  }
+
+  if (item.status === "服务中") {
+    const label = state.currentRole === "serviceProvider" ? "查看服务进度" : "填写服务";
+    return `<button class="mini-btn" data-use-order="${item.id}">${label}</button>`;
+  }
+
+  return "";
 }
 
 function renderCases() {
@@ -172,10 +370,30 @@ function renderCases() {
   `).join("");
 }
 
+function orderCard(item, selectable = false) {
+  const selected = item.id === state.selectedOrderId ? " selected" : "";
+  return `
+    <article class="record-card${selectable ? selected : ""}">
+      <div class="record-top">
+        <strong>${item.id} · ${item.customer}</strong>
+        ${pill(item.status)}
+      </div>
+      <div class="record-meta">
+        <span>${item.source}</span>
+        <span>${item.mode}</span>
+        <span>${item.type}</span>
+        <span>${item.priority}优先级</span>
+      </div>
+      <p>${item.device} · ${item.appointment}<br>${item.address}</p>
+      <div class="record-actions">
+        ${getOrderAction(item)}
+      </div>
+    </article>
+  `;
+}
+
 function renderOrders() {
-  const orderList = $("#orderList");
-  const cards = state.orders.map(orderCard).join("");
-  orderList.innerHTML = cards;
+  $("#orderList").innerHTML = getVisibleOrders().map((item) => orderCard(item)).join("");
 
   $("#dispatchList").innerHTML = state.orders
     .filter((item) => item.status === "待派工")
@@ -193,58 +411,6 @@ function renderOrders() {
     .join("");
 
   updateSelectedOrderLabel();
-  renderMetrics();
-  renderTasks();
-}
-
-function orderCard(item, selectable = false) {
-  const selected = item.id === state.selectedOrderId ? " selected" : "";
-  const action = item.status === "待派工"
-    ? `<button class="mini-btn" data-select-order="${item.id}">选择派工</button>`
-    : item.status === "服务中"
-      ? `<button class="mini-btn" data-use-order="${item.id}">填写服务</button>`
-      : `<button class="mini-btn" data-review-order="${item.id}">查看评价</button>`;
-  return `
-    <article class="record-card${selectable ? selected : ""}">
-      <div class="record-top">
-        <strong>${item.id} · ${item.customer}</strong>
-        ${pill(item.status)}
-      </div>
-      <div class="record-meta">
-        <span>${item.source}</span>
-        <span>${item.mode}</span>
-        <span>${item.type}</span>
-        <span>${item.priority}优先级</span>
-      </div>
-      <p>${item.device} · ${item.appointment}<br>${item.address}</p>
-      <div class="record-actions">
-        ${action}
-      </div>
-    </article>
-  `;
-}
-
-function renderMetrics() {
-  $("#metricCases").textContent = 28 + state.cases.length - 3;
-  $("#metricPending").textContent = state.cases.filter((item) => item.status === "待转工单").length;
-  $("#metricDispatch").textContent = state.orders.filter((item) => item.status === "待派工").length;
-  $("#metricClosed").textContent = 11 + state.orders.filter((item) => item.status === "已关闭").length - 1;
-}
-
-function renderTasks() {
-  const pending = state.cases.filter((item) => item.status === "待转工单").length;
-  const dispatch = state.orders.filter((item) => item.status === "待派工").length;
-  const service = state.orders.filter((item) => item.status === "服务中").length;
-  $("#taskList").innerHTML = [
-    ["售后案例待转工单", pending, "cases"],
-    ["工单等待派工", dispatch, "dispatch"],
-    ["服务人员待补充记录", service, "execution"]
-  ].map(([label, count, view]) => `
-    <button class="task-item" data-jump="${view}">
-      <span><strong>${label}</strong><span>点击进入处理队列</span></span>
-      <span class="status-pill ${count ? "warn" : "green"}">${count}</span>
-    </button>
-  `).join("");
 }
 
 function updateSelectedOrderLabel() {
@@ -296,7 +462,7 @@ function createOrderFromCase(caseId) {
   item.status = "已转工单";
   state.selectedOrderId = order.id;
   renderAll();
-  switchView("orders");
+  switchView(state.currentRole === "customerService" ? "orders" : "dispatch");
   showToast(`${item.id} 已转为服务工单 ${order.id}。`);
 }
 
@@ -333,16 +499,17 @@ function dispatchSelected(providerDispatch = false) {
     showToast("请先选择一张待派工工单。");
     return;
   }
-  const providerMode = providerDispatch || state.assignment === "provider";
+  const providerMode = providerDispatch || state.assignment === "provider" || state.currentRole === "serviceProvider";
   order.status = "服务中";
   order.provider = providerMode ? $("#providerSelect").value : "自营服务团队";
   order.worker = providerMode ? `${$("#workerSelect").value}（服务商派工）` : $("#workerSelect").value;
   renderAll();
-  showToast(providerMode ? `${order.id} 已派给服务商并完成二次派工。` : `${order.id} 已直接派给服务人员。`);
+  showToast(providerMode ? `${order.id} 已派给工程师继续处理。` : `${order.id} 已直接派给服务人员。`);
 }
 
 function saveService(closeAfterSave = false) {
-  const order = state.orders.find((item) => item.status === "服务中") || state.orders.find((item) => item.id === state.selectedOrderId);
+  const order = state.orders.find((item) => item.id === state.selectedOrderId && item.status === "服务中")
+    || state.orders.find((item) => item.status === "服务中");
   if (!order) {
     showToast("暂无服务中工单可填写。");
     return;
@@ -378,7 +545,57 @@ function renderReview(orderId) {
   $(".review-tags").innerHTML = order.review.tags.map((tag) => `<span>${tag}</span>`).join("");
 }
 
+function applyRoleUI() {
+  const config = getRoleConfig();
+  $("#roleName").textContent = config.label;
+
+  $$(".nav-item").forEach((button) => {
+    button.hidden = !config.allowedViews.includes(button.dataset.view);
+  });
+
+  config.quickActions.forEach((action) => {
+    const button = $(`#${action.id}`);
+    button.hidden = action.hidden;
+    button.dataset.targetView = action.view;
+    button.innerHTML = `${action.primary ? '<i data-lucide="file-plus-2"></i>' : '<i data-lucide="plus"></i>'}${action.label}`;
+  });
+
+  const directCard = $('[data-assignment="direct"]');
+  const providerCard = $('[data-assignment="provider"]');
+  const dispatchBtn = $("#dispatchBtn");
+  const providerAssignBtn = $("#providerAssignBtn");
+
+  if (state.currentRole === "serviceProvider") {
+    directCard.hidden = true;
+    providerCard.classList.add("active");
+    state.assignment = "provider";
+    $("#providerField").style.opacity = "1";
+    dispatchBtn.textContent = "派给工程师";
+    providerAssignBtn.hidden = true;
+  } else {
+    directCard.hidden = false;
+    dispatchBtn.textContent = "确认派工";
+    providerAssignBtn.hidden = false;
+  }
+
+  if (state.currentRole === "engineer") {
+    providerAssignBtn.hidden = true;
+    directCard.hidden = false;
+  }
+
+  renderRoleBrief();
+  renderMetrics();
+  renderTasks();
+
+  if (!config.allowedViews.includes(getCurrentView())) {
+    switchView(config.defaultView);
+  } else {
+    switchView(getCurrentView());
+  }
+}
+
 function renderAll() {
+  applyRoleUI();
   renderCases();
   renderOrders();
   renderReview(state.selectedOrderId);
@@ -396,14 +613,16 @@ function bindEvents() {
 
   $$(".nav-item").forEach((button) => button.addEventListener("click", () => switchView(button.dataset.view)));
   $$(".flow-step").forEach((button) => button.addEventListener("click", () => switchView(button.dataset.jump)));
-  $("#quickCaseBtn").addEventListener("click", () => switchView("cases"));
-  $("#quickOrderBtn").addEventListener("click", () => switchView("orders"));
+  $("#quickCaseBtn").addEventListener("click", (event) => switchView(event.currentTarget.dataset.targetView || "cases"));
+  $("#quickOrderBtn").addEventListener("click", (event) => switchView(event.currentTarget.dataset.targetView || "orders"));
   $("#goDispatchBtn").addEventListener("click", () => switchView("dispatch"));
 
   $$(".role-tabs button").forEach((button) => button.addEventListener("click", () => {
     $$(".role-tabs button").forEach((item) => item.classList.remove("active"));
     button.classList.add("active");
-    $("#roleName").textContent = button.dataset.role;
+    state.currentRole = button.dataset.roleKey;
+    renderAll();
+    switchView(getRoleConfig().defaultView);
     showToast(`已切换为${button.dataset.role}视角。`);
   }));
 
@@ -479,7 +698,7 @@ function bindEvents() {
     if (use) {
       state.selectedOrderId = use.dataset.useOrder;
       switchView("execution");
-      showToast(`正在填写 ${state.selectedOrderId} 的服务记录。`);
+      showToast(`正在处理 ${state.selectedOrderId}。`);
     }
 
     const review = event.target.closest("[data-review-order]");

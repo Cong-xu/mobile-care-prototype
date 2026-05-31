@@ -303,6 +303,10 @@ textarea:focus {
   background: var(--nav-soft);
 }
 
+.nav-item[hidden] {
+  display: none;
+}
+
 .role-card {
   margin-top: auto;
   padding: 14px;
@@ -362,6 +366,12 @@ textarea:focus {
   font-size: 27px;
 }
 
+.panel-subcopy {
+  margin: 8px 0 0;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
 .top-actions,
 .button-row {
   display: flex;
@@ -382,6 +392,37 @@ textarea:focus {
   grid-template-columns: repeat(4, minmax(150px, 1fr));
   gap: 14px;
   margin-bottom: 16px;
+}
+
+.role-brief {
+  margin-bottom: 16px;
+}
+
+.brief-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.brief-card {
+  min-height: 108px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 14px;
+  background: #f9fbfd;
+}
+
+.brief-card strong {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 15px;
+}
+
+.brief-card p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.6;
+  font-size: 13px;
 }
 
 .metric,
@@ -761,6 +802,10 @@ blockquote {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .brief-grid {
+    grid-template-columns: 1fr;
+  }
+
   .split-layout,
   .split-layout.form-first,
   .dispatch-layout {
@@ -824,7 +869,8 @@ blockquote {
   .metrics-grid,
   .flow,
   .form-grid,
-  .assignment-options {
+  .assignment-options,
+  .brief-grid {
     grid-template-columns: 1fr;
   }
 
