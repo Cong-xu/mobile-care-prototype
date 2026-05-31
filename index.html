@@ -1,0 +1,467 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>手机售后服务响应原型</title>
+    <link rel="stylesheet" href="./styles.css" />
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  </head>
+  <body>
+    <main class="login-screen" id="loginScreen">
+      <section class="login-panel">
+        <div class="brand-mark">M</div>
+        <p class="eyebrow">Mobile Care Desk</p>
+        <h1>售后工单与服务响应平台</h1>
+        <p class="login-copy">统一受理投诉、咨询与售后案例，并将服务请求流转到工单、服务商和一线服务人员。</p>
+        <form id="loginForm" class="login-form">
+          <label>
+            账号
+            <input value="service.manager" autocomplete="username" />
+          </label>
+          <label>
+            密码
+            <input type="password" value="prototype" autocomplete="current-password" />
+          </label>
+          <button type="submit" class="primary-btn wide">
+            <i data-lucide="log-in"></i>
+            登录工作台
+          </button>
+        </form>
+      </section>
+      <section class="login-visual" aria-label="今日服务概览">
+        <div class="phone-shell">
+          <div class="phone-status"></div>
+          <div class="phone-card strong">
+            <span>售后案例</span>
+            <strong>28</strong>
+          </div>
+          <div class="phone-card">
+            <span>待派工</span>
+            <strong>9</strong>
+          </div>
+          <div class="phone-card">
+            <span>进行中</span>
+            <strong>16</strong>
+          </div>
+          <div class="phone-card done">
+            <span>今日关闭</span>
+            <strong>11</strong>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <main class="app-shell hidden" id="appShell">
+      <aside class="sidebar">
+        <div class="sidebar-brand">
+          <div class="brand-mark small">M</div>
+          <div>
+            <strong>Care Desk</strong>
+            <span>手机服务运营</span>
+          </div>
+        </div>
+        <nav class="nav-list" aria-label="主导航">
+          <button class="nav-item active" data-view="dashboard"><i data-lucide="layout-dashboard"></i>总览</button>
+          <button class="nav-item" data-view="cases"><i data-lucide="inbox"></i>案例录入</button>
+          <button class="nav-item" data-view="orders"><i data-lucide="clipboard-list"></i>服务工单</button>
+          <button class="nav-item" data-view="dispatch"><i data-lucide="route"></i>派工调度</button>
+          <button class="nav-item" data-view="execution"><i data-lucide="wrench"></i>服务执行</button>
+          <button class="nav-item" data-view="reviews"><i data-lucide="star"></i>评价闭环</button>
+        </nav>
+        <div class="role-card">
+          <span>当前角色</span>
+          <strong id="roleName">客服主管</strong>
+          <div class="role-tabs" aria-label="角色切换">
+            <button class="active" data-role="客服主管">客服</button>
+            <button data-role="服务商调度">服务商</button>
+            <button data-role="服务工程师">工程师</button>
+          </div>
+        </div>
+      </aside>
+
+      <section class="workspace">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow" id="viewEyebrow">工作台</p>
+            <h2 id="viewTitle">服务响应总览</h2>
+          </div>
+          <div class="top-actions">
+            <button class="ghost-btn" id="quickCaseBtn"><i data-lucide="plus"></i>新建案例</button>
+            <button class="primary-btn" id="quickOrderBtn"><i data-lucide="file-plus-2"></i>手动建工单</button>
+          </div>
+        </header>
+
+        <section class="view active" id="dashboardView">
+          <div class="metrics-grid">
+            <article class="metric"><span>今日新案例</span><strong id="metricCases">28</strong><small>投诉 6 / 咨询 11 / 售后 11</small></article>
+            <article class="metric warn"><span>待转工单</span><strong id="metricPending">7</strong><small>建议优先处理高价值客户</small></article>
+            <article class="metric blue"><span>待派工</span><strong id="metricDispatch">9</strong><small>到店 4 / 上门 5</small></article>
+            <article class="metric green"><span>已关闭</span><strong id="metricClosed">11</strong><small>平均评分 4.7</small></article>
+          </div>
+          <div class="split-layout">
+            <section class="panel">
+              <div class="panel-head">
+                <h3>服务流程</h3>
+              </div>
+              <div class="flow">
+                <button class="flow-step" data-jump="cases"><i data-lucide="message-square-plus"></i><span>录入案例</span></button>
+                <button class="flow-step" data-jump="orders"><i data-lucide="arrow-right-left"></i><span>转/建工单</span></button>
+                <button class="flow-step" data-jump="dispatch"><i data-lucide="send"></i><span>派工</span></button>
+                <button class="flow-step" data-jump="execution"><i data-lucide="settings"></i><span>服务执行</span></button>
+                <button class="flow-step" data-jump="reviews"><i data-lucide="badge-check"></i><span>关闭评价</span></button>
+              </div>
+            </section>
+            <section class="panel">
+              <div class="panel-head">
+                <h3>待办提醒</h3>
+              </div>
+              <div class="task-list" id="taskList"></div>
+            </section>
+          </div>
+        </section>
+
+        <section class="view" id="casesView">
+          <div class="split-layout form-first">
+            <form class="panel form-panel" id="caseForm">
+              <div class="panel-head">
+                <h3>录入案例</h3>
+                <span class="status-pill">客服受理</span>
+              </div>
+              <div class="form-grid">
+                <label>案例类型
+                  <select id="caseType">
+                    <option>售后</option>
+                    <option>投诉</option>
+                    <option>咨询</option>
+                  </select>
+                </label>
+                <label>案例来源
+                  <select id="caseSource">
+                    <option>400 热线</option>
+                    <option>App 在线客服</option>
+                    <option>官网服务申请</option>
+                    <option>线下门店</option>
+                    <option>电商平台</option>
+                    <option>社媒舆情</option>
+                  </select>
+                </label>
+                <label>客户姓名
+                  <input id="customerName" value="林可" />
+                </label>
+                <label>联系电话
+                  <input id="customerPhone" value="138 0000 9527" />
+                </label>
+                <label>备用电话
+                  <input id="backupPhone" value="021-6200 8899" />
+                </label>
+                <label>客户等级
+                  <select id="customerLevel">
+                    <option>普通用户</option>
+                    <option>会员用户</option>
+                    <option>高价值用户</option>
+                    <option>企业客户</option>
+                  </select>
+                </label>
+                <label>联系偏好
+                  <select id="contactPreference">
+                    <option>电话回访</option>
+                    <option>短信通知</option>
+                    <option>App 消息</option>
+                    <option>微信服务通知</option>
+                  </select>
+                </label>
+                <label>设备型号
+                  <input id="deviceModel" value="Aster X Pro" />
+                </label>
+                <label>IMEI / SN
+                  <input id="deviceSn" value="AXP2605280098" />
+                </label>
+                <label>颜色 / 容量
+                  <input id="deviceSpec" value="钛灰 / 512GB" />
+                </label>
+                <label>系统版本
+                  <input id="osVersion" value="OS 18.2.1" />
+                </label>
+                <label>购买渠道
+                  <select id="channel">
+                    <option>官方商城</option>
+                    <option>线下门店</option>
+                    <option>运营商渠道</option>
+                    <option>电商平台</option>
+                  </select>
+                </label>
+                <label>购买日期
+                  <input id="purchaseDate" type="date" value="2026-02-18" />
+                </label>
+                <label>保修 / 权益状态
+                  <select id="warrantyStatus">
+                    <option>保内</option>
+                    <option>延保</option>
+                    <option>保外</option>
+                    <option>待校验</option>
+                  </select>
+                </label>
+                <label>故障分类
+                  <select id="faultCategory">
+                    <option>电池 / 充电</option>
+                    <option>屏幕 / 触控</option>
+                    <option>主板 / 无法开机</option>
+                    <option>相机 / 音频</option>
+                    <option>网络 / 信号</option>
+                    <option>外观 / 结构</option>
+                  </select>
+                </label>
+                <label>故障频率
+                  <select id="faultFrequency">
+                    <option>持续出现</option>
+                    <option>间歇出现</option>
+                    <option>特定场景出现</option>
+                    <option>仅出现一次</option>
+                  </select>
+                </label>
+                <label>是否进液 / 摔落
+                  <select id="damageHistory">
+                    <option>无明显人为损伤</option>
+                    <option>曾摔落</option>
+                    <option>疑似进液</option>
+                    <option>外观破损</option>
+                  </select>
+                </label>
+                <label>数据备份状态
+                  <select id="backupStatus">
+                    <option>已备份</option>
+                    <option>未备份</option>
+                    <option>需要协助备份</option>
+                    <option>无需保留数据</option>
+                  </select>
+                </label>
+                <label>用户诉求
+                  <select id="customerRequest">
+                    <option>检测维修</option>
+                    <option>换货</option>
+                    <option>退货退款</option>
+                    <option>保养清洁</option>
+                    <option>解释/回访</option>
+                  </select>
+                </label>
+                <label class="wide-field">附件 / 凭证
+                  <input id="attachments" value="购机发票、故障视频、设备照片" />
+                </label>
+                <label class="wide-field">问题描述
+                  <textarea id="caseDesc">手机充电发热明显，电量从 30% 到满电需要 3 小时以上。</textarea>
+                </label>
+              </div>
+              <div class="button-row">
+                <button type="submit" class="primary-btn"><i data-lucide="save"></i>保存案例</button>
+                <button type="button" class="ghost-btn" id="convertCaseBtn"><i data-lucide="arrow-right"></i>售后案例转工单</button>
+              </div>
+            </form>
+            <section class="panel">
+              <div class="panel-head">
+                <h3>案例队列</h3>
+                <div class="segmented" id="caseFilter">
+                  <button class="active" data-filter="全部">全部</button>
+                  <button data-filter="售后">售后</button>
+                  <button data-filter="投诉">投诉</button>
+                  <button data-filter="咨询">咨询</button>
+                </div>
+              </div>
+              <div class="record-list" id="caseList"></div>
+            </section>
+          </div>
+        </section>
+
+        <section class="view" id="ordersView">
+          <div class="split-layout form-first">
+            <form class="panel form-panel" id="orderForm">
+              <div class="panel-head">
+                <h3>服务工单</h3>
+                <span class="status-pill blue">可从售后案例转入，也可手动创建</span>
+              </div>
+              <div class="form-grid">
+                <label>服务方式
+                  <select id="serviceMode">
+                    <option>上门服务</option>
+                    <option>到店服务</option>
+                  </select>
+                </label>
+                <label>服务类型
+                  <select id="serviceType">
+                    <option>维修</option>
+                    <option>换货</option>
+                    <option>保养</option>
+                    <option>退货</option>
+                  </select>
+                </label>
+                <label>预约时间
+                  <input id="appointment" value="2026-05-29 10:00" />
+                </label>
+                <label>优先级
+                  <select id="priority">
+                    <option>高</option>
+                    <option>中</option>
+                    <option>低</option>
+                  </select>
+                </label>
+                <label class="wide-field">服务地址 / 门店
+                  <input id="serviceAddress" value="上海市徐汇区虹桥路 88 号 12F" />
+                </label>
+                <label class="wide-field">工单说明
+                  <textarea id="orderDesc">需检测电池健康度、充电接口和快充协议识别状态。</textarea>
+                </label>
+              </div>
+              <div class="button-row">
+                <button type="submit" class="primary-btn"><i data-lucide="file-plus-2"></i>创建工单</button>
+                <button type="button" class="ghost-btn" id="goDispatchBtn"><i data-lucide="send"></i>进入派工</button>
+              </div>
+            </form>
+            <section class="panel">
+              <div class="panel-head">
+                <h3>工单列表</h3>
+              </div>
+              <div class="record-list" id="orderList"></div>
+            </section>
+          </div>
+        </section>
+
+        <section class="view" id="dispatchView">
+          <div class="dispatch-layout">
+            <section class="panel">
+              <div class="panel-head">
+                <h3>待派工工单</h3>
+                <span class="status-pill blue" id="selectedOrderLabel">请选择工单</span>
+              </div>
+              <div class="record-list compact" id="dispatchList"></div>
+            </section>
+            <section class="panel">
+              <div class="panel-head">
+                <h3>派工方式</h3>
+              </div>
+              <div class="assignment-options">
+                <button class="assign-card active" data-assignment="direct">
+                  <i data-lucide="user-check"></i>
+                  <strong>直接派给服务人员</strong>
+                  <span>适合自营服务团队或紧急上门。</span>
+                </button>
+                <button class="assign-card" data-assignment="provider">
+                  <i data-lucide="building-2"></i>
+                  <strong>派给服务商</strong>
+                  <span>服务商接单后再派给服务人员。</span>
+                </button>
+              </div>
+              <div class="form-grid">
+                <label id="providerField">服务商
+                  <select id="providerSelect">
+                    <option>迅捷服务上海中心</option>
+                    <option>星环授权服务商</option>
+                    <option>北区旗舰服务中心</option>
+                  </select>
+                </label>
+                <label>服务人员
+                  <select id="workerSelect">
+                    <option>周明 / 电池与主板</option>
+                    <option>赵雅 / 屏幕与外观</option>
+                    <option>韩川 / 上门综合</option>
+                  </select>
+                </label>
+                <label class="wide-field">派工备注
+                  <textarea id="dispatchNote">请携带电池检测仪、USB-C 接口备件和 65W 充电器。</textarea>
+                </label>
+              </div>
+              <div class="button-row">
+                <button class="primary-btn" id="dispatchBtn"><i data-lucide="send"></i>确认派工</button>
+                <button class="ghost-btn" id="providerAssignBtn"><i data-lucide="users"></i>服务商二次派工</button>
+              </div>
+            </section>
+          </div>
+        </section>
+
+        <section class="view" id="executionView">
+          <div class="split-layout form-first">
+            <form class="panel form-panel" id="serviceForm">
+              <div class="panel-head">
+                <h3>服务人员填写</h3>
+                <span class="status-pill warn">现场处理中</span>
+              </div>
+              <div class="form-grid">
+                <label>故障现象
+                  <select id="faultType">
+                    <option>充电慢 / 发热</option>
+                    <option>无法开机</option>
+                    <option>屏幕异常</option>
+                    <option>网络异常</option>
+                  </select>
+                </label>
+                <label>检测结果
+                  <select id="diagnosis">
+                    <option>电池健康度低于阈值</option>
+                    <option>接口进液腐蚀</option>
+                    <option>主板电源模块异常</option>
+                    <option>未复现故障</option>
+                  </select>
+                </label>
+                <label>备件名称
+                  <input id="partName" value="Aster X Pro 电池模组" />
+                </label>
+                <label>备件编码
+                  <input id="partCode" value="BAT-AXP-5000" />
+                </label>
+                <label>数量
+                  <input id="partQty" type="number" value="1" min="0" />
+                </label>
+                <label>费用
+                  <input id="fee" value="保内免费" />
+                </label>
+                <label class="wide-field">处理说明
+                  <textarea id="serviceNote">已更换电池模组并完成充电压力测试，温控恢复正常。</textarea>
+                </label>
+              </div>
+              <div class="button-row">
+                <button type="submit" class="primary-btn"><i data-lucide="package-plus"></i>保存服务记录</button>
+                <button type="button" class="ghost-btn" id="closeOrderBtn"><i data-lucide="circle-check"></i>完成并关闭工单</button>
+              </div>
+            </form>
+            <section class="panel">
+              <div class="panel-head">
+                <h3>进行中工单</h3>
+              </div>
+              <div class="record-list" id="executionList"></div>
+            </section>
+          </div>
+        </section>
+
+        <section class="view" id="reviewsView">
+          <div class="split-layout">
+            <section class="panel">
+              <div class="panel-head">
+                <h3>已关闭工单</h3>
+              </div>
+              <div class="record-list" id="closedList"></div>
+            </section>
+            <section class="panel review-panel">
+              <div class="panel-head">
+                <h3>用户评价</h3>
+                <span class="status-pill green">服务闭环</span>
+              </div>
+              <div class="rating-block">
+                <strong id="ratingScore">4.8</strong>
+                <div class="stars">★★★★★</div>
+                <span id="ratingOrder">WO-260528-001</span>
+              </div>
+              <blockquote id="reviewText">工程师准时上门，解释很清楚，更换后充电速度恢复正常。</blockquote>
+              <div class="review-tags">
+                <span>响应及时</span>
+                <span>专业可靠</span>
+                <span>备件充足</span>
+              </div>
+            </section>
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <div class="toast" id="toast" role="status"></div>
+    <script src="./script.js"></script>
+  </body>
+</html>
