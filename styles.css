@@ -28,11 +28,21 @@ body {
   letter-spacing: 0;
 }
 
+body.app-active {
+  height: 100vh;
+  overflow: hidden;
+}
+
 button,
 input,
 select,
 textarea {
   font: inherit;
+}
+
+input[readonly] {
+  color: #4e5d6d;
+  background: #f3f6f9;
 }
 
 button {
@@ -178,6 +188,10 @@ textarea:focus {
   color: var(--primary);
 }
 
+.device-lookup-label {
+  align-self: end;
+}
+
 .wide {
   width: 100%;
 }
@@ -246,16 +260,17 @@ textarea:focus {
 }
 
 .app-shell {
-  min-height: 100vh;
+  height: 100vh;
   display: grid;
   grid-template-columns: 268px minmax(0, 1fr);
+  overflow: hidden;
 }
 
 .sidebar {
   display: flex;
   flex-direction: column;
   gap: 24px;
-  min-height: 100vh;
+  height: 100vh;
   padding: 22px 18px;
   color: #e9f0f7;
   background: var(--nav);
@@ -307,6 +322,26 @@ textarea:focus {
   display: none;
 }
 
+.nav-item.child-nav {
+  margin-left: 18px;
+  width: calc(100% - 18px);
+  min-height: 38px;
+  color: #b8c8d8;
+  font-size: 13px;
+}
+
+.nav-item.child-nav::before {
+  width: 10px;
+  height: 1px;
+  content: "";
+  background: #6f8498;
+}
+
+.nav-item.child-nav svg {
+  width: 15px;
+  height: 15px;
+}
+
 .role-card {
   margin-top: auto;
   padding: 14px;
@@ -346,6 +381,8 @@ textarea:focus {
 
 .workspace {
   min-width: 0;
+  height: 100vh;
+  overflow-y: auto;
   padding: 26px;
 }
 
@@ -476,6 +513,16 @@ textarea:focus {
   grid-template-columns: minmax(420px, 1fr) minmax(360px, 0.86fr);
 }
 
+.stack-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+.detail-layout {
+  max-width: 980px;
+}
+
 .dispatch-layout {
   display: grid;
   grid-template-columns: minmax(330px, 0.72fr) minmax(430px, 1.28fr);
@@ -558,6 +605,46 @@ textarea:focus {
   gap: 10px;
 }
 
+.list-summary {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.summary-chip {
+  display: grid;
+  gap: 4px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #f9fbfd;
+}
+
+.summary-chip strong {
+  display: block;
+  margin: 0;
+  font-size: 22px;
+}
+
+.summary-chip span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.summary-chip.blue strong {
+  color: var(--blue);
+}
+
+.summary-chip.green strong {
+  color: var(--green);
+}
+
+.summary-chip.warn strong {
+  color: var(--amber);
+}
+
 .task-item,
 .record-card {
   border: 1px solid var(--line);
@@ -617,6 +704,28 @@ textarea:focus {
 .record-meta {
   color: var(--muted);
   font-size: 12px;
+}
+
+.meta-tag {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  border-radius: 999px;
+  padding: 3px 10px;
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--ink);
+  background: #eef2f6;
+}
+
+.meta-tag.blue {
+  color: var(--blue);
+  background: rgba(45, 103, 177, 0.12);
+}
+
+.meta-tag.green {
+  color: var(--green);
+  background: rgba(33, 122, 83, 0.12);
 }
 
 .mini-btn {
@@ -811,9 +920,18 @@ blockquote {
   .dispatch-layout {
     grid-template-columns: 1fr;
   }
+
+  .list-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 760px) {
+  body.app-active {
+    height: auto;
+    overflow: auto;
+  }
+
   .login-screen {
     grid-template-columns: 1fr;
     padding: 18px;
@@ -832,11 +950,13 @@ blockquote {
   }
 
   .app-shell {
+    height: auto;
     grid-template-columns: 1fr;
+    overflow: visible;
   }
 
   .sidebar {
-    min-height: auto;
+    height: auto;
     position: sticky;
     top: 0;
     z-index: 2;
@@ -849,7 +969,7 @@ blockquote {
   }
 
   .nav-list {
-    grid-template-columns: repeat(6, minmax(42px, 1fr));
+    grid-template-columns: repeat(4, minmax(42px, 1fr));
   }
 
   .workspace {
@@ -870,7 +990,8 @@ blockquote {
   .flow,
   .form-grid,
   .assignment-options,
-  .brief-grid {
+  .brief-grid,
+  .list-summary {
     grid-template-columns: 1fr;
   }
 

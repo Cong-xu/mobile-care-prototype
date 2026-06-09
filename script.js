@@ -1,5 +1,6 @@
 const state = {
   currentRole: "customerService",
+  selectedCaseId: "CS-260528-101",
   selectedOrderId: "WO-260528-001",
   assignment: "direct",
   caseFilter: "全部",
@@ -9,10 +10,14 @@ const state = {
       type: "售后",
       customer: "林可",
       phone: "138 0000 9527",
-      device: "Aster X Pro",
-      sn: "AXP2605280098",
-      source: "400 热线",
-      level: "高价值用户",
+    device: "Aster X Pro",
+    sn: "AXP2605280098",
+    spec: "钛灰 / 512GB",
+    osVersion: "OS 18.2.1",
+    channel: "官方商城",
+    purchaseDate: "2026-02-18",
+    source: "400 热线",
+    level: "高价值用户",
       faultCategory: "电池 / 充电",
       warranty: "保内",
       request: "检测维修",
@@ -24,9 +29,13 @@ const state = {
       type: "投诉",
       customer: "顾辰",
       phone: "139 1111 8671",
-      device: "Nova M2",
-      sn: "NM22605281031",
-      source: "线下门店",
+    device: "Nova M2",
+    sn: "NM22605281031",
+    spec: "月岩黑 / 256GB",
+    osVersion: "OS 17.6",
+    channel: "线下门店",
+    purchaseDate: "2025-11-03",
+    source: "线下门店",
       level: "普通用户",
       faultCategory: "服务体验",
       warranty: "待校验",
@@ -39,9 +48,13 @@ const state = {
       type: "咨询",
       customer: "周宁",
       phone: "136 2222 5077",
-      device: "Aster Mini",
-      sn: "AM2605280031",
-      source: "App 在线客服",
+    device: "Aster Mini",
+    sn: "AM2605280031",
+    spec: "冰川银 / 128GB",
+    osVersion: "OS 18.0",
+    channel: "App 在线客服",
+    purchaseDate: "2026-01-09",
+    source: "App 在线客服",
       level: "会员用户",
       faultCategory: "权益咨询",
       warranty: "延保",
@@ -53,15 +66,25 @@ const state = {
   orders: [
     {
       id: "WO-260528-001",
-      source: "CS-260528-101",
+      originType: "案例转工单",
+      sourceRef: "CS-260528-101",
       customer: "林可",
+      phone: "138 0000 9527",
       device: "Aster X Pro",
+      sn: "AXP2605280098",
       mode: "上门服务",
       type: "维修",
       appointment: "2026-05-29 10:00",
+      timeSlot: "13:00 - 18:00",
       address: "上海市徐汇区虹桥路 88 号 12F",
+      region: "上海南区 / 徐汇",
       priority: "高",
+      serviceSla: "24 小时内上门/接待",
+      feeOwner: "保内免费",
+      estimatedPart: "电池模组 / USB-C 接口件",
       status: "待派工",
+      request: "检测维修",
+      warranty: "保内",
       provider: "",
       worker: "",
       fault: "",
@@ -70,15 +93,25 @@ const state = {
     },
     {
       id: "WO-260528-002",
-      source: "手动创建",
+      originType: "手工创建工单",
+      sourceRef: "手工创建",
       customer: "孟怡",
+      phone: "137 8899 2234",
       device: "Fold Z",
+      sn: "FZ2605280288",
       mode: "到店服务",
       type: "保养",
       appointment: "2026-05-28 16:30",
+      timeSlot: "13:00 - 18:00",
       address: "上海徐家汇旗舰店",
+      region: "上海南区 / 徐汇",
       priority: "中",
+      serviceSla: "按预约时间执行",
+      feeOwner: "客户承担",
+      estimatedPart: "无备件 / 清洁耗材",
       status: "服务中",
+      request: "保养清洁",
+      warranty: "延保",
       provider: "自营服务团队",
       worker: "赵雅 / 屏幕与外观",
       fault: "外观检查与清洁保养",
@@ -87,15 +120,25 @@ const state = {
     },
     {
       id: "WO-260527-088",
-      source: "CS-260527-079",
+      originType: "案例转工单",
+      sourceRef: "CS-260527-079",
       customer: "许然",
+      phone: "136 7755 1108",
       device: "Aster X",
+      sn: "AX2605270079",
       mode: "上门服务",
       type: "换货",
       appointment: "2026-05-27 14:00",
+      timeSlot: "13:00 - 18:00",
       address: "上海市静安区南京西路 199 号",
+      region: "上海中区 / 静安",
       priority: "高",
+      serviceSla: "4 小时内响应",
+      feeOwner: "厂家承担",
+      estimatedPart: "整机换货",
       status: "已关闭",
+      request: "换货处理",
+      warranty: "保内",
       provider: "迅捷服务上海中心",
       worker: "韩川 / 上门综合",
       fault: "屏幕触控间歇失灵",
@@ -111,19 +154,53 @@ const state = {
 
 const titles = {
   dashboard: ["工作台", "服务响应总览"],
-  cases: ["客服受理", "案例录入"],
-  orders: ["工单中心", "服务工单"],
+  cases: ["客服受理", "案例详情"],
+  casesList: ["客服受理", "案例列表"],
+  orders: ["工单中心", "工单详情"],
+  ordersList: ["工单中心", "工单列表"],
   dispatch: ["调度台", "派工调度"],
   execution: ["服务现场", "服务执行"],
   reviews: ["闭环管理", "评价查看"]
+};
+
+const deviceCatalog = {
+  AXP2605280098: {
+    device: "Aster X Pro",
+    spec: "钛灰 / 512GB",
+    osVersion: "OS 18.2.1",
+    channel: "官方商城",
+    purchaseDate: "2026-02-18",
+    warranty: "保内",
+    customerLevel: "高价值用户"
+  },
+  NM22605281031: {
+    device: "Nova M2",
+    spec: "月岩黑 / 256GB",
+    osVersion: "OS 17.6",
+    channel: "线下门店",
+    purchaseDate: "2025-11-03",
+    warranty: "待校验",
+    customerLevel: "普通用户"
+  },
+  AM2605280031: {
+    device: "Aster Mini",
+    spec: "冰川银 / 128GB",
+    osVersion: "OS 18.0",
+    channel: "官方商城",
+    purchaseDate: "2026-01-09",
+    warranty: "延保",
+    customerLevel: "会员用户"
+  }
 };
 
 const roleConfigs = {
   customerService: {
     label: "客服主管",
     shortLabel: "客服",
-    defaultView: "cases",
-    allowedViews: ["dashboard", "cases", "orders", "reviews"],
+    profileName: "林薇",
+    profileAvatar: "客",
+    defaultView: "dashboard",
+    allowedViews: ["dashboard", "casesList", "cases", "reviews"],
     scope: "客服聚焦案例受理、诉求判断与售后案例转服务工单。",
     briefTitle: "客服工作焦点",
     briefTag: "案例受理",
@@ -133,15 +210,17 @@ const roleConfigs = {
       ["推动服务闭环", "跟踪工单结果和客户反馈，把前台受理和后续服务接起来。"] 
     ],
     quickActions: [
-      { id: "quickCaseBtn", label: "新建案例", view: "cases", hidden: false, primary: false },
-      { id: "quickOrderBtn", label: "手动建工单", view: "orders", hidden: false, primary: true }
+      { id: "quickCaseBtn", label: "案例列表", view: "casesList", hidden: false, primary: false },
+      { id: "quickOrderBtn", label: "新建案例", view: "cases", hidden: false, primary: true }
     ]
   },
   serviceProvider: {
     label: "服务商调度",
     shortLabel: "服务商",
-    defaultView: "dispatch",
-    allowedViews: ["dashboard", "orders", "dispatch", "reviews"],
+    profileName: "陈拓",
+    profileAvatar: "商",
+    defaultView: "dashboard",
+    allowedViews: ["dashboard", "ordersList", "orders", "dispatch", "reviews"],
     scope: "服务商聚焦接单、派单和服务资源调度，确保工单顺畅流转到工程师。",
     briefTitle: "服务商工作焦点",
     briefTag: "接单派单",
@@ -151,15 +230,17 @@ const roleConfigs = {
       ["跟进执行状态", "掌握服务中工单进展，必要时协调改约、换人或补件。"] 
     ],
     quickActions: [
-      { id: "quickCaseBtn", label: "查看工单池", view: "orders", hidden: false, primary: false },
+      { id: "quickCaseBtn", label: "工单列表", view: "ordersList", hidden: false, primary: false },
       { id: "quickOrderBtn", label: "进入派工台", view: "dispatch", hidden: false, primary: true }
     ]
   },
   engineer: {
     label: "服务工程师",
     shortLabel: "工程师",
-    defaultView: "execution",
-    allowedViews: ["dashboard", "orders", "execution", "reviews"],
+    profileName: "周明",
+    profileAvatar: "工",
+    defaultView: "dashboard",
+    allowedViews: ["dashboard", "execution", "reviews"],
     scope: "工程师聚焦执行工单、填写故障与备件信息，并完成服务回传。",
     briefTitle: "工程师工作焦点",
     briefTag: "服务执行",
@@ -169,7 +250,7 @@ const roleConfigs = {
       ["完成工单回传", "确认服务结果、提交完工记录并闭环到客户评价。"] 
     ],
     quickActions: [
-      { id: "quickCaseBtn", label: "查看工单", view: "orders", hidden: false, primary: false },
+      { id: "quickCaseBtn", label: "我的派单", view: "execution", hidden: false, primary: false },
       { id: "quickOrderBtn", label: "处理工单", view: "execution", hidden: false, primary: true }
     ]
   }
@@ -198,6 +279,18 @@ function getRoleConfig() {
 function getCurrentView() {
   const active = $(".view.active");
   return active ? active.id.replace("View", "") : "dashboard";
+}
+
+function getOrderOriginTone(order) {
+  return order.originType === "案例转工单" ? "blue" : "green";
+}
+
+function getOrderOriginLabel(order) {
+  return order.originType || "手工创建工单";
+}
+
+function getOrderSourceRef(order) {
+  return order.sourceRef || "手工创建";
 }
 
 function switchView(view) {
@@ -245,7 +338,7 @@ function getRoleMetrics() {
     { label: "今日新案例", value: 28 + state.cases.length - 3, note: "投诉 6 / 咨询 11 / 售后 11", tone: "" },
     { label: "待转工单", value: waitingCases, note: "建议优先处理高价值客户", tone: "warn" },
     { label: "待客服跟进", value: followCases, note: "投诉与咨询需安排回访或解释", tone: "blue" },
-    { label: "已形成工单", value: state.orders.filter((item) => item.source !== "手动创建").length, note: "售后案例已进入服务链路", tone: "green" }
+    { label: "已形成工单", value: state.orders.filter((item) => item.originType === "案例转工单").length, note: "售后案例已进入服务链路", tone: "green" }
   ];
 }
 
@@ -282,7 +375,7 @@ function getTaskItems() {
 
   if (state.currentRole === "serviceProvider") {
     return [
-      ["待接单工单", waitingOrders, "orders"],
+      ["待接单工单", waitingOrders, "ordersList"],
       ["待派工给工程师", waitingOrders, "dispatch"],
       ["查看已关闭评价", closedOrders, "reviews"]
     ];
@@ -297,8 +390,8 @@ function getTaskItems() {
   }
 
   return [
-    ["售后案例待转工单", waitingCases, "cases"],
-    ["投诉咨询待跟进", followCases, "cases"],
+    ["售后案例待转工单", waitingCases, "casesList"],
+    ["投诉咨询待跟进", followCases, "casesList"],
     ["查看已关闭评价", closedOrders, "reviews"]
   ];
 }
@@ -310,6 +403,29 @@ function renderTasks() {
       <span class="status-pill ${count ? "warn" : "green"}">${count}</span>
     </button>
   `).join("");
+}
+
+function syncOrderFormDetails(order) {
+  const activeOrder = order || state.orders.find((item) => item.id === state.selectedOrderId);
+  if (!activeOrder) return;
+
+  $("#orderCustomer").value = activeOrder.customer || "";
+  $("#orderPhone").value = activeOrder.phone || "";
+  $("#orderDevice").value = activeOrder.device || "";
+  $("#orderDeviceSn").value = activeOrder.sn || "";
+  $("#orderWarranty").value = activeOrder.warranty || "待校验";
+  $("#orderRequest").value = activeOrder.request || "检测维修";
+  $("#serviceMode").value = activeOrder.mode || "上门服务";
+  $("#serviceType").value = activeOrder.type || "维修";
+  $("#appointment").value = activeOrder.appointment || "";
+  $("#priority").value = activeOrder.priority || "中";
+  $("#serviceSla").value = activeOrder.serviceSla || "24 小时内上门/接待";
+  $("#timeSlot").value = activeOrder.timeSlot || "13:00 - 18:00";
+  $("#serviceRegion").value = activeOrder.region || "";
+  $("#feeOwner").value = activeOrder.feeOwner || "待判责";
+  $("#estimatedPart").value = activeOrder.estimatedPart || "";
+  $("#serviceAddress").value = activeOrder.address || "";
+  $("#orderDesc").value = activeOrder.orderDesc || activeOrder.serviceNote || "需补充工单说明。";
 }
 
 function getVisibleOrders() {
@@ -346,9 +462,10 @@ function getOrderAction(item) {
 
 function renderCases() {
   const container = $("#caseList");
+  const pageContainer = $("#caseListPage");
   const list = state.caseFilter === "全部" ? state.cases : state.cases.filter((item) => item.type === state.caseFilter);
-  container.innerHTML = list.map((item) => `
-    <article class="record-card">
+  const markup = list.map((item) => `
+    <article class="record-card${item.id === state.selectedCaseId ? " selected" : ""}">
       <div class="record-top">
         <strong>${item.id} · ${item.customer}</strong>
         ${pill(item.status)}
@@ -364,10 +481,28 @@ function renderCases() {
       <p>${item.desc}</p>
       <div class="record-actions">
         ${item.type === "售后" ? `<button class="mini-btn" data-convert="${item.id}">转服务工单</button>` : ""}
-        <button class="mini-btn" data-fill-case="${item.id}">查看/带入</button>
+        <button class="mini-btn" data-fill-case="${item.id}">查看详情</button>
       </div>
     </article>
   `).join("");
+  if (container) container.innerHTML = markup;
+  if (pageContainer) pageContainer.innerHTML = markup;
+
+  const summary = $("#caseListSummary");
+  if (summary) {
+    const total = state.cases.length;
+    const afterSales = state.cases.filter((item) => item.type === "售后").length;
+    const complaint = state.cases.filter((item) => item.type === "投诉").length;
+    const consulting = state.cases.filter((item) => item.type === "咨询").length;
+    const pending = state.cases.filter((item) => item.status === "待转工单").length;
+    summary.innerHTML = `
+      <article class="summary-chip"><strong>${total}</strong><span>全部案例</span></article>
+      <article class="summary-chip"><strong>${afterSales}</strong><span>售后案例</span></article>
+      <article class="summary-chip"><strong>${complaint}</strong><span>投诉案例</span></article>
+      <article class="summary-chip"><strong>${consulting}</strong><span>咨询案例</span></article>
+      <article class="summary-chip warn"><strong>${pending}</strong><span>待转工单</span></article>
+    `;
+  }
 }
 
 function orderCard(item, selectable = false) {
@@ -379,13 +514,17 @@ function orderCard(item, selectable = false) {
         ${pill(item.status)}
       </div>
       <div class="record-meta">
-        <span>${item.source}</span>
+        <span class="meta-tag ${getOrderOriginTone(item)}">${getOrderOriginLabel(item)}</span>
+        <span>${getOrderSourceRef(item)}</span>
         <span>${item.mode}</span>
         <span>${item.type}</span>
         <span>${item.priority}优先级</span>
+        <span>${item.serviceSla || "按预约执行"}</span>
+        <span>${item.region || "待分区"}</span>
       </div>
-      <p>${item.device} · ${item.appointment}<br>${item.address}</p>
+      <p>${item.device} · ${item.appointment} · ${item.timeSlot || "时段待定"}<br>${item.address}<br>联系人 ${item.customer} / ${item.phone || "待补充"} · ${item.feeOwner || "待判责"} · 预估备件 ${item.estimatedPart || "待补充"}</p>
       <div class="record-actions">
+        ${getRoleConfig().allowedViews.includes("orders") ? `<button class="mini-btn" data-view-order="${item.id}">查看详情</button>` : ""}
         ${getOrderAction(item)}
       </div>
     </article>
@@ -393,7 +532,12 @@ function orderCard(item, selectable = false) {
 }
 
 function renderOrders() {
-  $("#orderList").innerHTML = getVisibleOrders().map((item) => orderCard(item)).join("");
+  const visibleOrders = getVisibleOrders();
+  const ordersMarkup = visibleOrders.map((item) => orderCard(item)).join("");
+  const orderList = $("#orderList");
+  if (orderList) orderList.innerHTML = ordersMarkup;
+  const orderListPage = $("#orderListPage");
+  if (orderListPage) orderListPage.innerHTML = ordersMarkup;
 
   $("#dispatchList").innerHTML = state.orders
     .filter((item) => item.status === "待派工")
@@ -410,26 +554,117 @@ function renderOrders() {
     .map((item) => orderCard(item))
     .join("");
 
+  const summary = $("#orderListSummary");
+  if (summary) {
+    const total = visibleOrders.length;
+    const waiting = visibleOrders.filter((item) => item.status === "待派工").length;
+    const active = visibleOrders.filter((item) => item.status === "服务中").length;
+    const closed = visibleOrders.filter((item) => item.status === "已关闭").length;
+    const converted = visibleOrders.filter((item) => item.originType === "案例转工单").length;
+    summary.innerHTML = `
+      <article class="summary-chip"><strong>${total}</strong><span>全部工单</span></article>
+      <article class="summary-chip blue"><strong>${waiting}</strong><span>待派工</span></article>
+      <article class="summary-chip warn"><strong>${active}</strong><span>服务中</span></article>
+      <article class="summary-chip green"><strong>${closed}</strong><span>已关闭</span></article>
+      <article class="summary-chip"><strong>${converted}</strong><span>案例转工单</span></article>
+    `;
+  }
+
   updateSelectedOrderLabel();
+  syncOrderFormOrigin(state.orders.find((item) => item.id === state.selectedOrderId));
+  syncOrderFormDetails(state.orders.find((item) => item.id === state.selectedOrderId));
+  updateOrderDetailLabel();
+  updateCaseDetailLabel();
 }
 
 function updateSelectedOrderLabel() {
   const order = state.orders.find((item) => item.id === state.selectedOrderId);
-  $("#selectedOrderLabel").textContent = order ? `${order.id} · ${order.customer}` : "请选择工单";
+  $("#selectedOrderLabel").textContent = order ? `${order.id} · ${getOrderOriginLabel(order)}` : "请选择工单";
+}
+
+function syncOrderFormOrigin(order) {
+  const originInput = $("#orderOrigin");
+  const sourceRefInput = $("#orderSourceRef");
+  if (!originInput || !sourceRefInput) return;
+
+  if (order) {
+    originInput.value = getOrderOriginLabel(order);
+    sourceRefInput.value = getOrderSourceRef(order);
+    return;
+  }
+
+  originInput.value = "手工创建工单";
+  sourceRefInput.value = "手工创建";
 }
 
 function fillCase(caseItem) {
+  if (!caseItem) return;
+  state.selectedCaseId = caseItem.id;
   $("#caseType").value = caseItem.type;
   $("#caseSource").value = caseItem.source || "400 热线";
   $("#customerName").value = caseItem.customer;
   $("#customerPhone").value = caseItem.phone;
   $("#deviceModel").value = caseItem.device;
   $("#deviceSn").value = caseItem.sn;
+  $("#deviceSpec").value = caseItem.spec || "";
+  $("#osVersion").value = caseItem.osVersion || "";
+  $("#channel").value = caseItem.channel || "";
+  $("#purchaseDate").value = caseItem.purchaseDate || "";
   $("#customerLevel").value = caseItem.level || "普通用户";
   $("#faultCategory").value = caseItem.faultCategory || "电池 / 充电";
   $("#warrantyStatus").value = caseItem.warranty || "待校验";
   $("#customerRequest").value = caseItem.request || "检测维修";
   $("#caseDesc").value = caseItem.desc;
+
+  $("#orderCustomer").value = caseItem.customer || "";
+  $("#orderPhone").value = caseItem.phone || "";
+  $("#orderDevice").value = caseItem.device || "";
+  $("#orderDeviceSn").value = caseItem.sn || "";
+  $("#orderWarranty").value = caseItem.warranty || "待校验";
+  $("#orderRequest").value = caseItem.request || "检测维修";
+  $("#estimatedPart").value = caseItem.faultCategory === "电池 / 充电" ? "电池模组 / USB-C 接口件" : "待工程师初检";
+  $("#orderDesc").value = `来源案例：${caseItem.id}，需围绕“${caseItem.desc}”安排服务处理。`;
+  updateCaseDetailLabel();
+}
+
+function updateCaseDetailLabel() {
+  const label = $("#caseDetailLabel");
+  if (!label) return;
+  const item = state.cases.find((caseItem) => caseItem.id === state.selectedCaseId);
+  label.textContent = item ? `${item.id} · ${item.status}` : "新建案例";
+}
+
+function updateOrderDetailLabel() {
+  const label = $("#orderDetailLabel");
+  if (!label) return;
+  const order = state.orders.find((item) => item.id === state.selectedOrderId);
+  label.textContent = order ? `${order.id} · ${getOrderOriginLabel(order)}` : "手工创建工单";
+}
+
+function lookupDeviceInfo(showMessage = true) {
+  const sn = $("#deviceSn").value.trim();
+  const device = deviceCatalog[sn];
+  if (!device) {
+    $("#deviceModel").value = "未识别设备";
+    $("#deviceSpec").value = "";
+    $("#osVersion").value = "";
+    $("#channel").value = "";
+    $("#purchaseDate").value = "";
+    $("#warrantyStatus").value = "待校验";
+    $("#autoFillHint").value = "未识别到设备档案，请核对 SN / IMEI 后重试。";
+    if (showMessage) showToast("未识别到该 SN / IMEI 对应的设备档案。");
+    return;
+  }
+
+  $("#deviceModel").value = device.device;
+  $("#deviceSpec").value = device.spec;
+  $("#osVersion").value = device.osVersion;
+  $("#channel").value = device.channel;
+  $("#purchaseDate").value = device.purchaseDate;
+  $("#warrantyStatus").value = device.warranty;
+  $("#customerLevel").value = device.customerLevel;
+  $("#autoFillHint").value = `已根据 ${sn} 自动带出设备与权益信息，以下字段已锁定。`;
+  if (showMessage) showToast(`已根据 ${sn} 自动带出设备信息。`);
 }
 
 function createOrderFromCase(caseId) {
@@ -440,17 +675,26 @@ function createOrderFromCase(caseId) {
   }
   const order = {
     id: uid("WO"),
-    source: item.id,
+    originType: "案例转工单",
+    sourceRef: item.id,
     customer: item.customer,
+    phone: item.phone,
     device: item.device,
+    sn: item.sn,
     mode: $("#serviceMode").value,
     type: $("#serviceType").value,
     appointment: $("#appointment").value,
+    timeSlot: $("#timeSlot").value,
     address: $("#serviceAddress").value,
+    region: $("#serviceRegion").value,
     priority: $("#priority").value,
+    serviceSla: $("#serviceSla").value,
+    feeOwner: $("#feeOwner").value,
+    estimatedPart: $("#estimatedPart").value,
     warranty: item.warranty,
     faultCategory: item.faultCategory,
     request: item.request,
+    orderDesc: $("#orderDesc").value,
     status: "待派工",
     provider: "",
     worker: "",
@@ -461,25 +705,35 @@ function createOrderFromCase(caseId) {
   state.orders.unshift(order);
   item.status = "已转工单";
   state.selectedOrderId = order.id;
+  syncOrderFormOrigin(order);
   renderAll();
-  switchView(state.currentRole === "customerService" ? "orders" : "dispatch");
-  showToast(`${item.id} 已转为服务工单 ${order.id}。`);
+  switchView(state.currentRole === "serviceProvider" ? "dispatch" : "casesList");
+  showToast(`${item.id} 已转为服务工单 ${order.id}，服务商可继续派工。`);
 }
 
 function createManualOrder() {
   const order = {
     id: uid("WO"),
-    source: "手动创建",
-    customer: $("#customerName").value || "新客户",
-    device: $("#deviceModel").value || "待补充设备",
+    originType: "手工创建工单",
+    sourceRef: "手工创建",
+    customer: $("#orderCustomer").value || $("#customerName").value || "新客户",
+    phone: $("#orderPhone").value || $("#customerPhone").value || "",
+    device: $("#orderDevice").value || $("#deviceModel").value || "待补充设备",
+    sn: $("#orderDeviceSn").value || $("#deviceSn").value || "",
     mode: $("#serviceMode").value,
     type: $("#serviceType").value,
     appointment: $("#appointment").value,
+    timeSlot: $("#timeSlot").value,
     address: $("#serviceAddress").value,
+    region: $("#serviceRegion").value,
     priority: $("#priority").value,
-    warranty: $("#warrantyStatus") ? $("#warrantyStatus").value : "待校验",
+    warranty: $("#orderWarranty").value || ($("#warrantyStatus") ? $("#warrantyStatus").value : "待校验"),
     faultCategory: $("#faultCategory") ? $("#faultCategory").value : "未分类",
-    request: $("#customerRequest") ? $("#customerRequest").value : "检测维修",
+    request: $("#orderRequest").value || ($("#customerRequest") ? $("#customerRequest").value : "检测维修"),
+    serviceSla: $("#serviceSla").value,
+    feeOwner: $("#feeOwner").value,
+    estimatedPart: $("#estimatedPart").value,
+    orderDesc: $("#orderDesc").value,
     status: "待派工",
     provider: "",
     worker: "",
@@ -489,7 +743,9 @@ function createManualOrder() {
   };
   state.orders.unshift(order);
   state.selectedOrderId = order.id;
+  syncOrderFormOrigin(order);
   renderAll();
+  switchView("ordersList");
   showToast(`已手动创建工单 ${order.id}。`);
 }
 
@@ -548,6 +804,9 @@ function renderReview(orderId) {
 function applyRoleUI() {
   const config = getRoleConfig();
   $("#roleName").textContent = config.label;
+  $("#profileName").textContent = config.profileName;
+  $("#profileRole").textContent = config.label;
+  $("#profileAvatar").textContent = config.profileAvatar;
 
   $$(".nav-item").forEach((button) => {
     button.hidden = !config.allowedViews.includes(button.dataset.view);
@@ -605,6 +864,7 @@ function renderAll() {
 function bindEvents() {
   $("#loginForm").addEventListener("submit", (event) => {
     event.preventDefault();
+    document.body.classList.add("app-active");
     $("#loginScreen").classList.add("hidden");
     $("#appShell").classList.remove("hidden");
     renderAll();
@@ -654,21 +914,37 @@ function bindEvents() {
       status: $("#caseType").value === "售后" ? "待转工单" : "客服跟进"
     };
     state.cases.unshift(newCase);
+    state.selectedCaseId = newCase.id;
     renderAll();
+    switchView("casesList");
     showToast(`已保存${newCase.type}案例 ${newCase.id}。`);
   });
 
   $("#convertCaseBtn").addEventListener("click", () => createOrderFromCase());
+  $("#lookupDeviceBtn").addEventListener("click", () => lookupDeviceInfo(true));
   $("#orderForm").addEventListener("submit", (event) => {
     event.preventDefault();
     createManualOrder();
   });
 
-  $("#caseFilter").addEventListener("click", (event) => {
+  const caseFilter = $("#caseFilter");
+  if (caseFilter) {
+    caseFilter.addEventListener("click", (event) => {
+      const target = event.target.closest("button");
+      if (!target) return;
+      state.caseFilter = target.dataset.filter;
+      $$("#caseFilter button").forEach((button) => button.classList.toggle("active", button === target));
+      $$("#caseListFilter button").forEach((button) => button.classList.toggle("active", button.dataset.filter === state.caseFilter));
+      renderCases();
+    });
+  }
+
+  $("#caseListFilter").addEventListener("click", (event) => {
     const target = event.target.closest("button");
     if (!target) return;
     state.caseFilter = target.dataset.filter;
-    $$("#caseFilter button").forEach((button) => button.classList.toggle("active", button === target));
+    $$("#caseListFilter button").forEach((button) => button.classList.toggle("active", button === target));
+    $$("#caseFilter button").forEach((button) => button.classList.toggle("active", button.dataset.filter === state.caseFilter));
     renderCases();
   });
 
@@ -680,15 +956,28 @@ function bindEvents() {
     if (fill) {
       const item = state.cases.find((caseItem) => caseItem.id === fill.dataset.fillCase);
       fillCase(item);
-      showToast(`${item.id} 已带入录入表单。`);
+      renderCases();
+      switchView("cases");
+      showToast(`${item.id} 已打开案例详情。`);
     }
 
     const convert = event.target.closest("[data-convert]");
     if (convert) createOrderFromCase(convert.dataset.convert);
 
+    const viewOrder = event.target.closest("[data-view-order]");
+    if (viewOrder) {
+      state.selectedOrderId = viewOrder.dataset.viewOrder;
+      syncOrderFormOrigin(state.orders.find((item) => item.id === state.selectedOrderId));
+      syncOrderFormDetails(state.orders.find((item) => item.id === state.selectedOrderId));
+      renderOrders();
+      switchView("orders");
+      showToast(`${state.selectedOrderId} 已打开工单详情。`);
+    }
+
     const select = event.target.closest("[data-select-order]");
     if (select) {
       state.selectedOrderId = select.dataset.selectOrder;
+      syncOrderFormOrigin(state.orders.find((item) => item.id === state.selectedOrderId));
       renderAll();
       switchView("dispatch");
       showToast(`已选择 ${state.selectedOrderId}。`);
@@ -697,6 +986,7 @@ function bindEvents() {
     const use = event.target.closest("[data-use-order]");
     if (use) {
       state.selectedOrderId = use.dataset.useOrder;
+      syncOrderFormOrigin(state.orders.find((item) => item.id === state.selectedOrderId));
       switchView("execution");
       showToast(`正在处理 ${state.selectedOrderId}。`);
     }
@@ -726,4 +1016,6 @@ function bindEvents() {
 }
 
 bindEvents();
+lookupDeviceInfo(false);
+syncOrderFormOrigin();
 renderAll();

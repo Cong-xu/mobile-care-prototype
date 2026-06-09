@@ -55,16 +55,18 @@
     <main class="app-shell hidden" id="appShell">
       <aside class="sidebar">
         <div class="sidebar-brand">
-          <div class="brand-mark small">M</div>
+          <div class="brand-mark small" id="profileAvatar">客</div>
           <div>
-            <strong>Care Desk</strong>
-            <span>手机服务运营</span>
+            <strong id="profileName">林薇</strong>
+            <span id="profileRole">客服主管</span>
           </div>
         </div>
         <nav class="nav-list" aria-label="主导航">
           <button class="nav-item active" data-view="dashboard"><i data-lucide="layout-dashboard"></i>总览</button>
-          <button class="nav-item" data-view="cases"><i data-lucide="inbox"></i>案例录入</button>
-          <button class="nav-item" data-view="orders"><i data-lucide="clipboard-list"></i>服务工单</button>
+          <button class="nav-item" data-view="casesList"><i data-lucide="list"></i>案例列表</button>
+          <button class="nav-item child-nav" data-view="cases"><i data-lucide="file-text"></i>案例详情</button>
+          <button class="nav-item" data-view="ordersList"><i data-lucide="rows-3"></i>工单列表</button>
+          <button class="nav-item child-nav" data-view="orders"><i data-lucide="clipboard-list"></i>工单详情</button>
           <button class="nav-item" data-view="dispatch"><i data-lucide="route"></i>派工调度</button>
           <button class="nav-item" data-view="execution"><i data-lucide="wrench"></i>服务执行</button>
           <button class="nav-item" data-view="reviews"><i data-lucide="star"></i>评价闭环</button>
@@ -113,8 +115,8 @@
                 <h3>服务流程</h3>
               </div>
               <div class="flow">
-                <button class="flow-step" data-jump="cases"><i data-lucide="message-square-plus"></i><span>录入案例</span></button>
-                <button class="flow-step" data-jump="orders"><i data-lucide="arrow-right-left"></i><span>转/建工单</span></button>
+                <button class="flow-step" data-jump="casesList"><i data-lucide="message-square-plus"></i><span>案例列表</span></button>
+                <button class="flow-step" data-jump="ordersList"><i data-lucide="arrow-right-left"></i><span>工单列表</span></button>
                 <button class="flow-step" data-jump="dispatch"><i data-lucide="send"></i><span>派工</span></button>
                 <button class="flow-step" data-jump="execution"><i data-lucide="settings"></i><span>服务执行</span></button>
                 <button class="flow-step" data-jump="reviews"><i data-lucide="badge-check"></i><span>关闭评价</span></button>
@@ -130,11 +132,11 @@
         </section>
 
         <section class="view" id="casesView">
-          <div class="split-layout form-first">
+          <div class="stack-layout detail-layout">
             <form class="panel form-panel" id="caseForm">
               <div class="panel-head">
-                <h3>录入案例</h3>
-                <span class="status-pill">客服受理</span>
+                <h3>案例详情</h3>
+                <span class="status-pill" id="caseDetailLabel">新建案例</span>
               </div>
               <div class="form-grid">
                 <label>案例类型
@@ -179,36 +181,33 @@
                     <option>微信服务通知</option>
                   </select>
                 </label>
-                <label>设备型号
-                  <input id="deviceModel" value="Aster X Pro" />
-                </label>
                 <label>IMEI / SN
                   <input id="deviceSn" value="AXP2605280098" />
                 </label>
+                <label class="device-lookup-label">
+                  设备识别
+                  <button type="button" class="ghost-btn wide" id="lookupDeviceBtn">
+                    <i data-lucide="scan-search"></i>
+                    根据 SN / IMEI 带出
+                  </button>
+                </label>
+                <label>设备型号
+                  <input id="deviceModel" value="Aster X Pro" readonly />
+                </label>
                 <label>颜色 / 容量
-                  <input id="deviceSpec" value="钛灰 / 512GB" />
+                  <input id="deviceSpec" value="钛灰 / 512GB" readonly />
                 </label>
                 <label>系统版本
-                  <input id="osVersion" value="OS 18.2.1" />
+                  <input id="osVersion" value="OS 18.2.1" readonly />
                 </label>
                 <label>购买渠道
-                  <select id="channel">
-                    <option>官方商城</option>
-                    <option>线下门店</option>
-                    <option>运营商渠道</option>
-                    <option>电商平台</option>
-                  </select>
+                  <input id="channel" value="官方商城" readonly />
                 </label>
                 <label>购买日期
-                  <input id="purchaseDate" type="date" value="2026-02-18" />
+                  <input id="purchaseDate" type="date" value="2026-02-18" readonly />
                 </label>
                 <label>保修 / 权益状态
-                  <select id="warrantyStatus">
-                    <option>保内</option>
-                    <option>延保</option>
-                    <option>保外</option>
-                    <option>待校验</option>
-                  </select>
+                  <input id="warrantyStatus" value="保内" readonly />
                 </label>
                 <label>故障分类
                   <select id="faultCategory">
@@ -253,8 +252,11 @@
                     <option>解释/回访</option>
                   </select>
                 </label>
-                <label class="wide-field">附件 / 凭证
+                <label>附件 / 凭证
                   <input id="attachments" value="购机发票、故障视频、设备照片" />
+                </label>
+                <label class="wide-field">自动带出说明
+                  <input id="autoFillHint" value="设备信息已按识别结果锁定，如识别失败可改 SN / IMEI 后重新带出" readonly />
                 </label>
                 <label class="wide-field">问题描述
                   <textarea id="caseDesc">手机充电发热明显，电量从 30% 到满电需要 3 小时以上。</textarea>
@@ -265,29 +267,41 @@
                 <button type="button" class="ghost-btn" id="convertCaseBtn"><i data-lucide="arrow-right"></i>售后案例转工单</button>
               </div>
             </form>
-            <section class="panel">
-              <div class="panel-head">
-                <h3>案例队列</h3>
-                <div class="segmented" id="caseFilter">
-                  <button class="active" data-filter="全部">全部</button>
-                  <button data-filter="售后">售后</button>
-                  <button data-filter="投诉">投诉</button>
-                  <button data-filter="咨询">咨询</button>
-                </div>
-              </div>
-              <div class="record-list" id="caseList"></div>
-            </section>
           </div>
         </section>
 
         <section class="view" id="ordersView">
-          <div class="split-layout form-first">
+          <div class="stack-layout detail-layout">
             <form class="panel form-panel" id="orderForm">
               <div class="panel-head">
-                <h3>服务工单</h3>
-                <span class="status-pill blue">可从售后案例转入，也可手动创建</span>
+                <h3>工单详情</h3>
+                <span class="status-pill blue" id="orderDetailLabel">手工创建工单</span>
               </div>
               <div class="form-grid">
+                <label>工单来源
+                  <input id="orderOrigin" value="手工创建工单" readonly />
+                </label>
+                <label>来源编号 / 案例编号
+                  <input id="orderSourceRef" value="手工创建" readonly />
+                </label>
+                <label>客户姓名
+                  <input id="orderCustomer" value="林可" />
+                </label>
+                <label>联系电话
+                  <input id="orderPhone" value="138 0000 9527" />
+                </label>
+                <label>设备型号
+                  <input id="orderDevice" value="Aster X Pro" />
+                </label>
+                <label>SN / IMEI
+                  <input id="orderDeviceSn" value="AXP2605280098" />
+                </label>
+                <label>保修状态
+                  <input id="orderWarranty" value="保内" />
+                </label>
+                <label>服务诉求
+                  <input id="orderRequest" value="检测维修" />
+                </label>
                 <label>服务方式
                   <select id="serviceMode">
                     <option>上门服务</option>
@@ -312,6 +326,36 @@
                     <option>低</option>
                   </select>
                 </label>
+                <label>服务时效
+                  <select id="serviceSla">
+                    <option>4 小时内响应</option>
+                    <option selected>24 小时内上门/接待</option>
+                    <option>48 小时内完成处理</option>
+                    <option>按预约时间执行</option>
+                  </select>
+                </label>
+                <label>预约时段
+                  <select id="timeSlot">
+                    <option>09:00 - 12:00</option>
+                    <option selected>13:00 - 18:00</option>
+                    <option>18:00 - 21:00</option>
+                    <option>全天待定</option>
+                  </select>
+                </label>
+                <label>区域归属
+                  <input id="serviceRegion" value="上海南区 / 徐汇" />
+                </label>
+                <label>费用归属
+                  <select id="feeOwner">
+                    <option>厂家承担</option>
+                    <option>客户承担</option>
+                    <option selected>保内免费</option>
+                    <option>待判责</option>
+                  </select>
+                </label>
+                <label>预估备件
+                  <input id="estimatedPart" value="电池模组 / USB-C 接口件" />
+                </label>
                 <label class="wide-field">服务地址 / 门店
                   <input id="serviceAddress" value="上海市徐汇区虹桥路 88 号 12F" />
                 </label>
@@ -324,11 +368,36 @@
                 <button type="button" class="ghost-btn" id="goDispatchBtn"><i data-lucide="send"></i>进入派工</button>
               </div>
             </form>
+          </div>
+        </section>
+
+        <section class="view" id="casesListView">
+          <div class="stack-layout">
             <section class="panel">
               <div class="panel-head">
-                <h3>工单列表</h3>
+                <h3>案例列表</h3>
+                <div class="segmented" id="caseListFilter">
+                  <button class="active" data-filter="全部">全部</button>
+                  <button data-filter="售后">售后</button>
+                  <button data-filter="投诉">投诉</button>
+                  <button data-filter="咨询">咨询</button>
+                </div>
               </div>
-              <div class="record-list" id="orderList"></div>
+              <div class="list-summary" id="caseListSummary"></div>
+              <div class="record-list" id="caseListPage"></div>
+            </section>
+          </div>
+        </section>
+
+        <section class="view" id="ordersListView">
+          <div class="stack-layout">
+            <section class="panel">
+              <div class="panel-head">
+                <h3>服务工单列表</h3>
+                <span class="status-pill blue">支持查看来源、状态、时效与执行信息</span>
+              </div>
+              <div class="list-summary" id="orderListSummary"></div>
+              <div class="record-list" id="orderListPage"></div>
             </section>
           </div>
         </section>
