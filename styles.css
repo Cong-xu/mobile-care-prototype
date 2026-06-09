@@ -523,6 +523,10 @@ textarea:focus {
   max-width: 980px;
 }
 
+.review-only-layout {
+  max-width: 760px;
+}
+
 .dispatch-layout {
   display: grid;
   grid-template-columns: minmax(330px, 0.72fr) minmax(430px, 1.28fr);

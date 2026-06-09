@@ -301,6 +301,17 @@ function switchView(view) {
   $$(".nav-item").forEach((item) => item.classList.toggle("active", item.dataset.view === nextView));
   $("#viewEyebrow").textContent = titles[nextView][0];
   $("#viewTitle").textContent = titles[nextView][1];
+  syncQuickActions(config, nextView);
+  if (window.lucide) lucide.createIcons();
+}
+
+function syncQuickActions(config = getRoleConfig(), currentView = getCurrentView()) {
+  config.quickActions.forEach((action) => {
+    const button = $(`#${action.id}`);
+    button.hidden = action.hidden || currentView === "reviews";
+    button.dataset.targetView = action.view;
+    button.innerHTML = `${action.primary ? '<i data-lucide="file-plus-2"></i>' : '<i data-lucide="plus"></i>'}${action.label}`;
+  });
 }
 
 function pill(status) {
@@ -549,10 +560,13 @@ function renderOrders() {
     .map((item) => orderCard(item))
     .join("") || `<article class="record-card"><strong>暂无服务中工单</strong><p>派工后服务人员可在这里补充故障、备件和处理说明。</p></article>`;
 
-  $("#closedList").innerHTML = state.orders
-    .filter((item) => item.status === "已关闭")
-    .map((item) => orderCard(item))
-    .join("");
+  const closedList = $("#closedList");
+  if (closedList) {
+    closedList.innerHTML = state.orders
+      .filter((item) => item.status === "已关闭")
+      .map((item) => orderCard(item))
+      .join("");
+  }
 
   const summary = $("#orderListSummary");
   if (summary) {
@@ -803,6 +817,7 @@ function renderReview(orderId) {
 
 function applyRoleUI() {
   const config = getRoleConfig();
+  const currentView = getCurrentView();
   $("#roleName").textContent = config.label;
   $("#profileName").textContent = config.profileName;
   $("#profileRole").textContent = config.label;
@@ -812,12 +827,7 @@ function applyRoleUI() {
     button.hidden = !config.allowedViews.includes(button.dataset.view);
   });
 
-  config.quickActions.forEach((action) => {
-    const button = $(`#${action.id}`);
-    button.hidden = action.hidden;
-    button.dataset.targetView = action.view;
-    button.innerHTML = `${action.primary ? '<i data-lucide="file-plus-2"></i>' : '<i data-lucide="plus"></i>'}${action.label}`;
-  });
+  syncQuickActions(config, currentView);
 
   const directCard = $('[data-assignment="direct"]');
   const providerCard = $('[data-assignment="provider"]');
