@@ -296,11 +296,13 @@ function getOrderSourceRef(order) {
 function switchView(view) {
   const config = getRoleConfig();
   const nextView = config.allowedViews.includes(view) ? view : config.defaultView;
+  document.body.dataset.currentView = nextView;
   $$(".view").forEach((item) => item.classList.remove("active"));
   $(`#${nextView}View`).classList.add("active");
   $$(".nav-item").forEach((item) => item.classList.toggle("active", item.dataset.view === nextView));
   $("#viewEyebrow").textContent = titles[nextView][0];
   $("#viewTitle").textContent = titles[nextView][1];
+  $("#roleScope").textContent = nextView === "reviews" ? "查看用户评分、评价原文与服务标签。" : config.scope;
   syncQuickActions(config, nextView);
   if (window.lucide) lucide.createIcons();
 }

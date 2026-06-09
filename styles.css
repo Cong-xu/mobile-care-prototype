@@ -416,6 +416,10 @@ textarea:focus {
   gap: 10px;
 }
 
+body[data-current-view="reviews"] .top-actions {
+  display: none;
+}
+
 .view {
   display: none;
 }
