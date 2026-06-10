@@ -148,6 +148,99 @@ const state = {
         text: "工程师准时上门，解释很清楚，更换后充电速度恢复正常。",
         tags: ["响应及时", "专业可靠", "备件充足"]
       }
+    },
+    {
+      id: "WO-260527-091",
+      originType: "手工创建工单",
+      sourceRef: "手工创建",
+      customer: "孟怡",
+      phone: "137 8899 2234",
+      device: "Fold Z",
+      sn: "FZ2605270910",
+      mode: "到店服务",
+      type: "保养",
+      appointment: "2026-05-27 11:00",
+      timeSlot: "09:00 - 12:00",
+      address: "上海徐家汇旗舰店",
+      region: "上海南区 / 徐汇",
+      priority: "中",
+      serviceSla: "按预约时间执行",
+      feeOwner: "客户承担",
+      estimatedPart: "清洁耗材",
+      status: "已关闭",
+      request: "保养清洁",
+      warranty: "延保",
+      provider: "自营服务团队",
+      worker: "赵雅 / 屏幕与外观",
+      fault: "铰链清洁与外观检查",
+      part: "无备件",
+      review: {
+        score: "4.9",
+        text: "门店接待很快，保养过程透明，工程师提醒了后续使用注意事项。",
+        tags: ["过程透明", "门店体验好", "说明清楚"]
+      }
+    },
+    {
+      id: "WO-260526-076",
+      originType: "案例转工单",
+      sourceRef: "CS-260526-044",
+      customer: "顾辰",
+      phone: "139 1111 8671",
+      device: "Nova M2",
+      sn: "NM2260526076",
+      mode: "上门服务",
+      type: "维修",
+      appointment: "2026-05-26 15:30",
+      timeSlot: "13:00 - 18:00",
+      address: "上海市浦东新区张江路 889 号",
+      region: "上海东区 / 浦东",
+      priority: "高",
+      serviceSla: "24 小时内上门/接待",
+      feeOwner: "保内免费",
+      estimatedPart: "USB-C 接口件",
+      status: "已关闭",
+      request: "检测维修",
+      warranty: "保内",
+      provider: "星环授权服务商",
+      worker: "周明 / 电池与主板",
+      fault: "接口接触不良",
+      part: "USB-C 接口件",
+      review: {
+        score: "4.6",
+        text: "预约时间有提前确认，维修完成后当场测试，整体满意。",
+        tags: ["预约确认", "现场测试", "维修有效"]
+      }
+    },
+    {
+      id: "WO-260525-058",
+      originType: "案例转工单",
+      sourceRef: "CS-260525-022",
+      customer: "周宁",
+      phone: "136 2222 5077",
+      device: "Aster Mini",
+      sn: "AM2605250058",
+      mode: "到店服务",
+      type: "退货",
+      appointment: "2026-05-25 14:00",
+      timeSlot: "13:00 - 18:00",
+      address: "上海静安服务中心",
+      region: "上海中区 / 静安",
+      priority: "中",
+      serviceSla: "48 小时内完成处理",
+      feeOwner: "厂家承担",
+      estimatedPart: "无备件",
+      status: "已关闭",
+      request: "退货退款",
+      warranty: "保内",
+      provider: "北区旗舰服务中心",
+      worker: "韩川 / 上门综合",
+      fault: "退货检测完成",
+      part: "无备件",
+      review: {
+        score: "4.4",
+        text: "处理流程比较顺利，希望退款进度通知能再及时一些。",
+        tags: ["流程顺利", "通知待优化", "态度友好"]
+      }
     }
   ]
 };
@@ -159,7 +252,9 @@ const titles = {
   orders: ["工单中心", "工单详情"],
   ordersList: ["工单中心", "工单列表"],
   dispatch: ["调度台", "派工调度"],
-  execution: ["服务现场", "服务执行"],
+  staff: ["资源管理", "服务员工管理"],
+  executionList: ["服务现场", "服务执行"],
+  execution: ["服务现场", "服务执行详情"],
   reviews: ["闭环管理", "评价查看"]
 };
 
@@ -220,17 +315,17 @@ const roleConfigs = {
     profileName: "陈拓",
     profileAvatar: "商",
     defaultView: "dashboard",
-    allowedViews: ["dashboard", "ordersList", "orders", "dispatch", "reviews"],
+    allowedViews: ["dashboard", "ordersList", "orders", "dispatch", "staff", "reviews"],
     scope: "服务商聚焦接单、派单和服务资源调度，确保工单顺畅流转到工程师。",
     briefTitle: "服务商工作焦点",
     briefTag: "接单派单",
     briefCards: [
       ["查看工单池", "优先处理待派工和高优先级订单，核对服务方式、预约时间与区域归属。"],
-      ["派单给工程师", "根据技能、区域和负荷把工单分发给合适工程师，并补充派单说明。"],
+      ["管理工程师资源", "维护工程师技能、认证、区域、排班和负载，为派工提供依据。"],
       ["跟进执行状态", "掌握服务中工单进展，必要时协调改约、换人或补件。"] 
     ],
     quickActions: [
-      { id: "quickCaseBtn", label: "工单列表", view: "ordersList", hidden: false, primary: false },
+      { id: "quickCaseBtn", label: "员工管理", view: "staff", hidden: false, primary: false },
       { id: "quickOrderBtn", label: "进入派工台", view: "dispatch", hidden: false, primary: true }
     ]
   },
@@ -240,7 +335,7 @@ const roleConfigs = {
     profileName: "周明",
     profileAvatar: "工",
     defaultView: "dashboard",
-    allowedViews: ["dashboard", "execution", "reviews"],
+    allowedViews: ["dashboard", "executionList", "execution", "reviews"],
     scope: "工程师聚焦执行工单、填写故障与备件信息，并完成服务回传。",
     briefTitle: "工程师工作焦点",
     briefTag: "服务执行",
@@ -250,8 +345,8 @@ const roleConfigs = {
       ["完成工单回传", "确认服务结果、提交完工记录并闭环到客户评价。"] 
     ],
     quickActions: [
-      { id: "quickCaseBtn", label: "我的派单", view: "execution", hidden: false, primary: false },
-      { id: "quickOrderBtn", label: "处理工单", view: "execution", hidden: false, primary: true }
+      { id: "quickCaseBtn", label: "我的派单", view: "executionList", hidden: false, primary: false },
+      { id: "quickOrderBtn", label: "服务执行列表", view: "executionList", hidden: false, primary: true }
     ]
   }
 };
@@ -396,8 +491,8 @@ function getTaskItems() {
 
   if (state.currentRole === "engineer") {
     return [
-      ["待处理工单", activeOrders, "execution"],
-      ["填写故障与备件", partsPending, "execution"],
+      ["待处理工单", activeOrders, "executionList"],
+      ["填写故障与备件", partsPending, "executionList"],
       ["查看已完成工单", closedOrders, "reviews"]
     ];
   }
@@ -441,6 +536,41 @@ function syncOrderFormDetails(order) {
   $("#orderDesc").value = activeOrder.orderDesc || activeOrder.serviceNote || "需补充工单说明。";
 }
 
+function setFieldValue(selector, value) {
+  const field = $(selector);
+  if (field) field.value = value || "";
+}
+
+function syncExecutionFormDetails(order) {
+  const activeOrder = order || state.orders.find((item) => item.id === state.selectedOrderId);
+  if (!activeOrder) return;
+
+  $("#executionDetailLabel").textContent = `${activeOrder.id} · ${activeOrder.customer} · ${activeOrder.status}`;
+  setFieldValue("#arrivalTime", activeOrder.arrivalTime || "2026-05-28 16:05");
+  setFieldValue("#appearanceStatus", activeOrder.appearanceStatus || "外观完好");
+  setFieldValue("#dataBackupConfirm", activeOrder.dataBackupConfirm || "客户确认已备份");
+  setFieldValue("#warrantyDecision", activeOrder.warrantyDecision || activeOrder.feeOwner || "保内免费");
+  setFieldValue("#faultType", activeOrder.faultType || "充电慢 / 发热");
+  setFieldValue("#diagnosis", activeOrder.diagnosis || "电池健康度低于阈值");
+  setFieldValue("#rootCause", activeOrder.rootCause || "电池老化");
+  setFieldValue("#testReading", activeOrder.testReading || "电池健康度 72%，快充握手失败 2 次");
+  setFieldValue("#diagnosisNote", activeOrder.diagnosisNote || "完成外观检查、充电协议检测、电池健康度读取和温控压力测试。");
+  setFieldValue("#repairAction", activeOrder.repairAction || "更换备件");
+  setFieldValue("#partName", activeOrder.partName || activeOrder.estimatedPart || "Aster X Pro 电池模组");
+  setFieldValue("#partCode", activeOrder.partCode || "BAT-AXP-5000");
+  setFieldValue("#partSerial", activeOrder.partSerial || "SN-BAT-260528-8891");
+  setFieldValue("#partQty", activeOrder.partQty || "1");
+  setFieldValue("#oldPartHandling", activeOrder.oldPartHandling || "旧件回收");
+  setFieldValue("#fee", activeOrder.fee || activeOrder.feeOwner || "保内免费");
+  setFieldValue("#paymentStatus", activeOrder.paymentStatus || "无需支付");
+  setFieldValue("#servicePhotos", activeOrder.servicePhotos || "到场定位照片、设备外观照片、故障检测截图、备件更换前后照片、完工测试照片。");
+  setFieldValue("#serviceNote", activeOrder.serviceNote || "已更换电池模组并完成充电压力测试，温控恢复正常。");
+  setFieldValue("#qualityCheck", activeOrder.qualityCheck || "充电 / 开机 / 联网测试通过");
+  setFieldValue("#customerConfirm", activeOrder.customerConfirm || "客户现场确认完成");
+  setFieldValue("#serviceResult", activeOrder.serviceResult || "已修复");
+  setFieldValue("#followUpReminder", activeOrder.followUpReminder || "24 小时后回访充电温度与续航表现");
+}
+
 function getVisibleOrders() {
   if (state.currentRole === "engineer") {
     return state.orders.filter((item) => item.status !== "待派工");
@@ -479,19 +609,21 @@ function renderCases() {
   const list = state.caseFilter === "全部" ? state.cases : state.cases.filter((item) => item.type === state.caseFilter);
   const markup = list.map((item) => `
     <article class="record-card${item.id === state.selectedCaseId ? " selected" : ""}">
-      <div class="record-top">
-        <strong>${item.id} · ${item.customer}</strong>
-        ${pill(item.status)}
+      <div class="record-main">
+        <div class="record-top">
+          <strong>${item.id} · ${item.customer}</strong>
+          ${pill(item.status)}
+        </div>
+        <div class="record-meta">
+          <span>${item.type}</span>
+          <span>${item.source || "未知来源"}</span>
+          <span>${item.device}</span>
+          <span>${item.faultCategory || "未分类"}</span>
+          <span>${item.warranty || "待校验"}</span>
+          <span>${item.phone}</span>
+        </div>
+        <p>${item.desc}</p>
       </div>
-      <div class="record-meta">
-        <span>${item.type}</span>
-        <span>${item.source || "未知来源"}</span>
-        <span>${item.device}</span>
-        <span>${item.faultCategory || "未分类"}</span>
-        <span>${item.warranty || "待校验"}</span>
-        <span>${item.phone}</span>
-      </div>
-      <p>${item.desc}</p>
       <div class="record-actions">
         ${item.type === "售后" ? `<button class="mini-btn" data-convert="${item.id}">转服务工单</button>` : ""}
         <button class="mini-btn" data-fill-case="${item.id}">查看详情</button>
@@ -522,23 +654,61 @@ function orderCard(item, selectable = false) {
   const selected = item.id === state.selectedOrderId ? " selected" : "";
   return `
     <article class="record-card${selectable ? selected : ""}">
-      <div class="record-top">
-        <strong>${item.id} · ${item.customer}</strong>
-        ${pill(item.status)}
+      <div class="record-main">
+        <div class="record-top">
+          <strong>${item.id} · ${item.customer}</strong>
+          ${pill(item.status)}
+        </div>
+        <div class="record-meta">
+          <span class="meta-tag ${getOrderOriginTone(item)}">${getOrderOriginLabel(item)}</span>
+          <span>${getOrderSourceRef(item)}</span>
+          <span>${item.mode}</span>
+          <span>${item.type}</span>
+          <span>${item.priority}优先级</span>
+          <span>${item.serviceSla || "按预约执行"}</span>
+          <span>${item.region || "待分区"}</span>
+        </div>
+        <p>${item.device} · ${item.appointment} · ${item.timeSlot || "时段待定"}<br>${item.address}<br>联系人 ${item.customer} / ${item.phone || "待补充"} · ${item.feeOwner || "待判责"} · 预估备件 ${item.estimatedPart || "待补充"}</p>
       </div>
-      <div class="record-meta">
-        <span class="meta-tag ${getOrderOriginTone(item)}">${getOrderOriginLabel(item)}</span>
-        <span>${getOrderSourceRef(item)}</span>
-        <span>${item.mode}</span>
-        <span>${item.type}</span>
-        <span>${item.priority}优先级</span>
-        <span>${item.serviceSla || "按预约执行"}</span>
-        <span>${item.region || "待分区"}</span>
-      </div>
-      <p>${item.device} · ${item.appointment} · ${item.timeSlot || "时段待定"}<br>${item.address}<br>联系人 ${item.customer} / ${item.phone || "待补充"} · ${item.feeOwner || "待判责"} · 预估备件 ${item.estimatedPart || "待补充"}</p>
       <div class="record-actions">
         ${getRoleConfig().allowedViews.includes("orders") ? `<button class="mini-btn" data-view-order="${item.id}">查看详情</button>` : ""}
         ${getOrderAction(item)}
+      </div>
+    </article>
+  `;
+}
+
+function executionCard(item) {
+  const selected = item.id === state.selectedOrderId ? " selected" : "";
+  const progress = item.serviceResult || (item.serviceNote ? "已填写记录" : "待填写记录");
+  return `
+    <article class="execution-row${selected}">
+      <div class="execution-cell order-no">
+        <strong>${item.id}</strong>
+        <span>${progress}</span>
+      </div>
+      <div class="execution-cell">
+        <span class="cell-label">服务类型</span>
+        <strong>${item.type}</strong>
+        <span>${item.mode}</span>
+      </div>
+      <div class="execution-cell">
+        <span class="cell-label">客户名称</span>
+        <strong>${item.customer}</strong>
+        <span>${item.device}</span>
+      </div>
+      <div class="execution-cell">
+        <span class="cell-label">客户手机号</span>
+        <strong>${item.phone || "待补充"}</strong>
+        <span>${item.appointment}</span>
+      </div>
+      <div class="execution-cell address-cell">
+        <span class="cell-label">客户地址</span>
+        <strong>${item.address}</strong>
+        <span>${item.worker || "待确认工程师"}</span>
+      </div>
+      <div class="execution-cell action-cell">
+        <button class="mini-btn" data-use-order="${item.id}">填写服务详情</button>
       </div>
     </article>
   `;
@@ -557,10 +727,23 @@ function renderOrders() {
     .map((item) => orderCard(item, true))
     .join("") || `<article class="record-card"><strong>暂无待派工工单</strong><p>新建或转入工单后会出现在这里。</p></article>`;
 
-  $("#executionList").innerHTML = state.orders
-    .filter((item) => item.status === "服务中")
-    .map((item) => orderCard(item))
+  const executionOrders = state.orders.filter((item) => item.status === "服务中");
+  $("#executionList").innerHTML = executionOrders
+    .map((item) => executionCard(item))
     .join("") || `<article class="record-card"><strong>暂无服务中工单</strong><p>派工后服务人员可在这里补充故障、备件和处理说明。</p></article>`;
+
+  const executionSummary = $("#executionSummary");
+  if (executionSummary) {
+    const photoDone = executionOrders.filter((item) => item.servicePhotos).length;
+    const partsDone = executionOrders.filter((item) => item.part).length;
+    const confirmDone = executionOrders.filter((item) => item.customerConfirm && item.customerConfirm.includes("确认")).length;
+    executionSummary.innerHTML = `
+      <article class="summary-chip"><strong>${executionOrders.length}</strong><span>待处理派单</span></article>
+      <article class="summary-chip blue"><strong>${partsDone}</strong><span>已填备件</span></article>
+      <article class="summary-chip warn"><strong>${photoDone}</strong><span>已传照片</span></article>
+      <article class="summary-chip green"><strong>${confirmDone}</strong><span>客户确认</span></article>
+    `;
+  }
 
   const closedList = $("#closedList");
   if (closedList) {
@@ -589,6 +772,7 @@ function renderOrders() {
   updateSelectedOrderLabel();
   syncOrderFormOrigin(state.orders.find((item) => item.id === state.selectedOrderId));
   syncOrderFormDetails(state.orders.find((item) => item.id === state.selectedOrderId));
+  syncExecutionFormDetails(state.orders.find((item) => item.id === state.selectedOrderId));
   updateOrderDetailLabel();
   updateCaseDetailLabel();
 }
@@ -776,6 +960,7 @@ function dispatchSelected(providerDispatch = false) {
   order.provider = providerMode ? $("#providerSelect").value : "自营服务团队";
   order.worker = providerMode ? `${$("#workerSelect").value}（服务商派工）` : $("#workerSelect").value;
   renderAll();
+  switchView(state.currentRole === "serviceProvider" ? "dispatch" : "executionList");
   showToast(providerMode ? `${order.id} 已派给工程师继续处理。` : `${order.id} 已直接派给服务人员。`);
 }
 
@@ -786,10 +971,31 @@ function saveService(closeAfterSave = false) {
     showToast("暂无服务中工单可填写。");
     return;
   }
-  order.fault = `${$("#faultType").value} / ${$("#diagnosis").value}`;
-  order.part = `${$("#partName").value} ${$("#partCode").value} x${$("#partQty").value}`;
+  order.arrivalTime = $("#arrivalTime").value;
+  order.appearanceStatus = $("#appearanceStatus").value;
+  order.dataBackupConfirm = $("#dataBackupConfirm").value;
+  order.warrantyDecision = $("#warrantyDecision").value;
+  order.faultType = $("#faultType").value;
+  order.diagnosis = $("#diagnosis").value;
+  order.rootCause = $("#rootCause").value;
+  order.testReading = $("#testReading").value;
+  order.diagnosisNote = $("#diagnosisNote").value;
+  order.repairAction = $("#repairAction").value;
+  order.partName = $("#partName").value;
+  order.partCode = $("#partCode").value;
+  order.partSerial = $("#partSerial").value;
+  order.partQty = $("#partQty").value;
+  order.oldPartHandling = $("#oldPartHandling").value;
   order.fee = $("#fee").value;
+  order.paymentStatus = $("#paymentStatus").value;
+  order.servicePhotos = $("#servicePhotos").value;
   order.serviceNote = $("#serviceNote").value;
+  order.qualityCheck = $("#qualityCheck").value;
+  order.customerConfirm = $("#customerConfirm").value;
+  order.serviceResult = $("#serviceResult").value;
+  order.followUpReminder = $("#followUpReminder").value;
+  order.fault = `${order.faultType} / ${order.diagnosis} / ${order.rootCause}`;
+  order.part = `${order.partName} ${order.partCode} ${order.partSerial} x${order.partQty}`;
   if (closeAfterSave) {
     order.status = "已关闭";
     order.review = {
@@ -811,10 +1017,59 @@ function saveService(closeAfterSave = false) {
 function renderReview(orderId) {
   const order = state.orders.find((item) => item.id === orderId && item.review) || state.orders.find((item) => item.review);
   if (!order) return;
+  const reviewedOrders = state.orders.filter((item) => item.review);
+  const averageScore = reviewedOrders.reduce((sum, item) => sum + Number(item.review.score), 0) / reviewedOrders.length;
+  const excellentCount = reviewedOrders.filter((item) => Number(item.review.score) >= 4.7).length;
+  const tagCounts = reviewedOrders.flatMap((item) => item.review.tags).reduce((acc, tag) => {
+    acc[tag] = (acc[tag] || 0) + 1;
+    return acc;
+  }, {});
+  const topTag = Object.entries(tagCounts).sort((a, b) => b[1] - a[1])[0]?.[0] || "服务稳定";
+
   $("#ratingScore").textContent = order.review.score;
   $("#ratingOrder").textContent = order.id;
   $("#reviewText").textContent = order.review.text;
   $(".review-tags").innerHTML = order.review.tags.map((tag) => `<span>${tag}</span>`).join("");
+
+  $("#reviewSummary").innerHTML = `
+    <article class="review-stat">
+      <span>平均评分</span>
+      <strong>${averageScore.toFixed(1)}</strong>
+    </article>
+    <article class="review-stat">
+      <span>评价数量</span>
+      <strong>${reviewedOrders.length}</strong>
+    </article>
+    <article class="review-stat">
+      <span>高分评价</span>
+      <strong>${excellentCount}</strong>
+    </article>
+    <article class="review-stat">
+      <span>高频反馈</span>
+      <strong>${topTag}</strong>
+    </article>
+  `;
+
+  $("#reviewList").innerHTML = reviewedOrders.map((item) => `
+    <article class="review-card${item.id === order.id ? " active" : ""}" data-review-card="${item.id}">
+      <div class="review-card-head">
+        <div>
+          <strong>${item.customer}</strong>
+          <span>${item.id} · ${item.mode} · ${item.type}</span>
+        </div>
+        <b>${item.review.score}</b>
+      </div>
+      <p>${item.review.text}</p>
+      <div class="review-card-meta">
+        <span>${item.device}</span>
+        <span>${item.provider || "自营服务团队"}</span>
+        <span>${item.worker || "服务人员待补充"}</span>
+      </div>
+      <div class="review-tags compact">
+        ${item.review.tags.map((tag) => `<span>${tag}</span>`).join("")}
+      </div>
+    </article>
+  `).join("");
 }
 
 function applyRoleUI() {
@@ -999,6 +1254,7 @@ function bindEvents() {
     if (use) {
       state.selectedOrderId = use.dataset.useOrder;
       syncOrderFormOrigin(state.orders.find((item) => item.id === state.selectedOrderId));
+      syncExecutionFormDetails(state.orders.find((item) => item.id === state.selectedOrderId));
       switchView("execution");
       showToast(`正在处理 ${state.selectedOrderId}。`);
     }
@@ -1008,6 +1264,12 @@ function bindEvents() {
       state.selectedOrderId = review.dataset.reviewOrder;
       renderReview(state.selectedOrderId);
       switchView("reviews");
+    }
+
+    const reviewCard = event.target.closest("[data-review-card]");
+    if (reviewCard) {
+      state.selectedOrderId = reviewCard.dataset.reviewCard;
+      renderReview(state.selectedOrderId);
     }
   });
 
