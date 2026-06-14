@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>手机售后服务响应原型</title>
-    <link rel="stylesheet" href="./styles.css" />
+    <link rel="stylesheet" href="./styles.css?v=20260614-auto-dispatch" />
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
   </head>
   <body>
@@ -64,8 +64,10 @@
         <nav class="nav-list" aria-label="主导航">
           <button class="nav-item active" data-view="dashboard"><i data-lucide="layout-dashboard"></i>总览</button>
           <button class="nav-item" data-view="casesList"><i data-lucide="list"></i>案例列表</button>
+          <button class="nav-item" data-view="knowledge"><i data-lucide="book-open-text"></i>知识库</button>
+          <button class="nav-item" data-view="followups"><i data-lucide="phone-forwarded"></i>回访闭环</button>
           <button class="nav-item" data-view="ordersList"><i data-lucide="rows-3"></i>工单列表</button>
-          <button class="nav-item" data-view="dispatch"><i data-lucide="route"></i>派工调度</button>
+          <button class="nav-item" data-view="dispatch"><i data-lucide="route"></i>工单调度</button>
           <button class="nav-item" data-view="staff"><i data-lucide="users-round"></i>员工管理</button>
           <button class="nav-item" data-view="executionList"><i data-lucide="wrench"></i>服务执行</button>
           <button class="nav-item" data-view="reviews"><i data-lucide="star"></i>评价闭环</button>
@@ -101,6 +103,16 @@
             <article class="metric blue"><span>待派工</span><strong id="metricDispatch">9</strong><small>到店 4 / 上门 5</small></article>
             <article class="metric green"><span>已关闭</span><strong id="metricClosed">11</strong><small>平均评分 4.7</small></article>
           </div>
+          <section class="panel task-priority-panel">
+            <div class="panel-head">
+              <div>
+                <h3>待办提醒</h3>
+                <p>优先展示当前角色需要优先处理的待办事项。</p>
+              </div>
+              <span class="status-pill warn">重点处理</span>
+            </div>
+            <div class="task-list priority" id="taskList"></div>
+          </section>
           <section class="panel role-brief">
             <div class="panel-head">
               <h3 id="roleBriefTitle">客服工作焦点</h3>
@@ -108,38 +120,18 @@
             </div>
             <div class="brief-grid" id="roleBriefGrid"></div>
           </section>
-          <div class="split-layout">
-            <section class="panel">
-              <div class="panel-head">
-                <h3>服务流程</h3>
-              </div>
-              <div class="flow">
-                <button class="flow-step" data-jump="casesList"><i data-lucide="message-square-plus"></i><span>案例列表</span></button>
-                <button class="flow-step" data-jump="ordersList"><i data-lucide="arrow-right-left"></i><span>工单列表</span></button>
-                <button class="flow-step" data-jump="dispatch"><i data-lucide="send"></i><span>派工</span></button>
-                <button class="flow-step" data-jump="executionList"><i data-lucide="settings"></i><span>服务执行</span></button>
-                <button class="flow-step" data-jump="reviews"><i data-lucide="badge-check"></i><span>关闭评价</span></button>
-              </div>
-            </section>
-            <section class="panel">
-              <div class="panel-head">
-                <h3>待办提醒</h3>
-              </div>
-              <div class="task-list" id="taskList"></div>
-            </section>
-          </div>
         </section>
 
         <section class="view" id="casesView">
-          <div class="stack-layout detail-layout">
-            <form class="panel form-panel" id="caseForm">
+          <div class="case-detail-layout">
+            <form class="panel form-panel" id="caseForm" data-case-type="售后">
               <div class="panel-head">
                 <h3>案例详情</h3>
                 <span class="status-pill" id="caseDetailLabel">新建案例</span>
               </div>
               <div class="form-grid">
                 <label>案例类型
-                  <select id="caseType">
+                  <select id="caseType" onchange="this.form.dataset.caseType=this.value;document.getElementById('convertCaseBtn').hidden=this.value!=='售后'">
                     <option>售后</option>
                     <option>投诉</option>
                     <option>咨询</option>
@@ -155,22 +147,20 @@
                     <option>社媒舆情</option>
                   </select>
                 </label>
+                <label>订单号
+                  <input id="orderNo" value="SO-20260218-0098" />
+                </label>
                 <label>客户姓名
-                  <input id="customerName" value="林可" />
+                  <input id="customerName" value="林可" readonly />
                 </label>
                 <label>联系电话
-                  <input id="customerPhone" value="138 0000 9527" />
+                  <input id="customerPhone" value="138 0000 9527" readonly />
                 </label>
                 <label>备用电话
-                  <input id="backupPhone" value="021-6200 8899" />
+                  <input id="backupPhone" value="021-6200 8899" readonly />
                 </label>
                 <label>客户等级
-                  <select id="customerLevel">
-                    <option>普通用户</option>
-                    <option>会员用户</option>
-                    <option>高价值用户</option>
-                    <option>企业客户</option>
-                  </select>
+                  <input id="customerLevel" value="高价值用户" readonly />
                 </label>
                 <label>联系偏好
                   <select id="contactPreference">
@@ -180,15 +170,11 @@
                     <option>微信服务通知</option>
                   </select>
                 </label>
-                <label>IMEI / SN
-                  <input id="deviceSn" value="AXP2605280098" />
+                <label class="wide-field">客户地址
+                  <input id="customerAddress" value="上海市徐汇区虹桥路 88 号 12F" readonly />
                 </label>
-                <label class="device-lookup-label">
-                  设备识别
-                  <button type="button" class="ghost-btn wide" id="lookupDeviceBtn">
-                    <i data-lucide="scan-search"></i>
-                    根据 SN / IMEI 带出
-                  </button>
+                <label>IMEI / SN
+                  <input id="deviceSn" value="AXP2605280098" readonly />
                 </label>
                 <label>设备型号
                   <input id="deviceModel" value="Aster X Pro" readonly />
@@ -208,7 +194,11 @@
                 <label>保修 / 权益状态
                   <input id="warrantyStatus" value="保内" readonly />
                 </label>
-                <label>故障分类
+                <div class="form-section-title wide-field" data-case-kind="售后">
+                  <strong>售后服务信息</strong>
+                  <span>适用于维修、换货、退货、保养等需要转服务工单的案例</span>
+                </div>
+                <label data-case-kind="售后">故障分类
                   <select id="faultCategory">
                     <option>电池 / 充电</option>
                     <option>屏幕 / 触控</option>
@@ -218,7 +208,7 @@
                     <option>外观 / 结构</option>
                   </select>
                 </label>
-                <label>故障频率
+                <label data-case-kind="售后">故障频率
                   <select id="faultFrequency">
                     <option>持续出现</option>
                     <option>间歇出现</option>
@@ -226,7 +216,7 @@
                     <option>仅出现一次</option>
                   </select>
                 </label>
-                <label>是否进液 / 摔落
+                <label data-case-kind="售后">是否进液 / 摔落
                   <select id="damageHistory">
                     <option>无明显人为损伤</option>
                     <option>曾摔落</option>
@@ -234,7 +224,7 @@
                     <option>外观破损</option>
                   </select>
                 </label>
-                <label>数据备份状态
+                <label data-case-kind="售后">数据备份状态
                   <select id="backupStatus">
                     <option>已备份</option>
                     <option>未备份</option>
@@ -242,7 +232,7 @@
                     <option>无需保留数据</option>
                   </select>
                 </label>
-                <label>用户诉求
+                <label data-case-kind="售后">用户诉求
                   <select id="customerRequest">
                     <option>检测维修</option>
                     <option>换货</option>
@@ -251,11 +241,137 @@
                     <option>解释/回访</option>
                   </select>
                 </label>
-                <label>附件 / 凭证
+                <label data-case-kind="售后">期望服务方式
+                  <select id="expectedServiceMode">
+                    <option>上门服务</option>
+                    <option>到店服务</option>
+                    <option>寄修服务</option>
+                    <option>先远程诊断</option>
+                  </select>
+                </label>
+                <label data-case-kind="售后">期望服务时间
+                  <input id="expectedServiceTime" value="今天 13:00 - 18:00" />
+                </label>
+                <label data-case-kind="售后">附件 / 凭证
                   <input id="attachments" value="购机发票、故障视频、设备照片" />
                 </label>
-                <label class="wide-field">自动带出说明
-                  <input id="autoFillHint" value="设备信息已按识别结果锁定，如识别失败可改 SN / IMEI 后重新带出" readonly />
+
+                <div class="form-section-title wide-field" data-case-kind="咨询">
+                  <strong>咨询受理信息</strong>
+                  <span>适用于权益、功能、费用、服务政策、门店与进度查询</span>
+                </div>
+                <label data-case-kind="咨询">咨询主题
+                  <select id="inquiryTopic">
+                    <option>保修 / 延保权益</option>
+                    <option>维修价格与备件</option>
+                    <option>服务网点 / 到店预约</option>
+                    <option>功能使用 / 数据迁移</option>
+                    <option>订单 / 物流 / 退款进度</option>
+                  </select>
+                </label>
+                <label data-case-kind="咨询">咨询细分
+                  <select id="inquirySubtopic">
+                    <option>权益是否可用</option>
+                    <option>保养服务可用门店</option>
+                    <option>维修报价范围</option>
+                    <option>数据备份方法</option>
+                    <option>工单进度查询</option>
+                  </select>
+                </label>
+                <label data-case-kind="咨询">知识库匹配
+                  <input id="knowledgeMatched" value="KB-EXT-204 延保权益与保养服务说明" />
+                </label>
+                <label data-case-kind="咨询">答复状态
+                  <select id="answerStatus">
+                    <option>已一次性答复</option>
+                    <option>需补充资料后答复</option>
+                    <option>需转专家坐席</option>
+                    <option>需回访确认</option>
+                  </select>
+                </label>
+                <label data-case-kind="咨询">客户是否解决
+                  <select id="resolutionResult">
+                    <option>已解决</option>
+                    <option>部分解决</option>
+                    <option>未解决，需跟进</option>
+                  </select>
+                </label>
+                <label data-case-kind="咨询">回访时间
+                  <input id="inquiryFollowUpTime" value="明天 10:00 前" />
+                </label>
+                <label class="wide-field" data-case-kind="咨询">客户咨询内容
+                  <textarea id="inquiryQuestion">客户咨询延保权益是否包含免费保养，以及附近可用门店。</textarea>
+                </label>
+                <label class="wide-field" data-case-kind="咨询">客服答复摘要
+                  <textarea id="answerSummary">已说明延保权益范围、保养预约方式和可用门店，客户希望短信同步门店地址。</textarea>
+                </label>
+
+                <div class="form-section-title wide-field" data-case-kind="投诉">
+                  <strong>投诉处理信息</strong>
+                  <span>适用于服务体验、维修质量、承诺未兑现、价格争议等需升级跟进的案例</span>
+                </div>
+                <label data-case-kind="投诉">投诉对象
+                  <select id="complaintObject">
+                    <option>门店服务</option>
+                    <option>服务商 / 工程师</option>
+                    <option>维修质量</option>
+                    <option>客服答复</option>
+                    <option>物流 / 退款</option>
+                  </select>
+                </label>
+                <label data-case-kind="投诉">投诉原因
+                  <select id="complaintReason">
+                    <option>承诺时间未兑现</option>
+                    <option>多次维修未解决</option>
+                    <option>服务态度不佳</option>
+                    <option>收费或判责争议</option>
+                    <option>备件等待过久</option>
+                  </select>
+                </label>
+                <label data-case-kind="投诉">严重程度
+                  <select id="complaintSeverity">
+                    <option>一般</option>
+                    <option>较高</option>
+                    <option>高</option>
+                    <option>重大</option>
+                  </select>
+                </label>
+                <label data-case-kind="投诉">影响范围
+                  <select id="impactScope">
+                    <option>单个客户</option>
+                    <option>门店体验风险</option>
+                    <option>服务商履约风险</option>
+                    <option>舆情风险</option>
+                  </select>
+                </label>
+                <label data-case-kind="投诉">客户诉求
+                  <select id="complaintAppeal">
+                    <option>主管回访解释</option>
+                    <option>重新维修 / 换人处理</option>
+                    <option>换货</option>
+                    <option>退款 / 补偿</option>
+                    <option>道歉与时效承诺</option>
+                  </select>
+                </label>
+                <label data-case-kind="投诉">升级层级
+                  <select id="escalationLevel">
+                    <option>客服主管</option>
+                    <option>区域服务经理</option>
+                    <option>服务商负责人</option>
+                    <option>质量团队</option>
+                  </select>
+                </label>
+                <label data-case-kind="投诉">承诺回访时间
+                  <input id="promisedCallbackTime" value="2 小时内回访" />
+                </label>
+                <label data-case-kind="投诉">补偿期望
+                  <input id="compensationExpectation" value="希望免检测费并给出明确完成时间" />
+                </label>
+                <label data-case-kind="投诉">投诉凭证
+                  <input id="complaintEvidence" value="门店沟通截图、维修受理单、通话录音编号" />
+                </label>
+                <label class="wide-field">订单带出说明
+                  <input id="autoFillHint" value="客户、地址、设备与权益信息已按订单号带出并锁定。" readonly />
                 </label>
                 <label class="wide-field">问题描述
                   <textarea id="caseDesc">手机充电发热明显，电量从 30% 到满电需要 3 小时以上。</textarea>
@@ -266,6 +382,31 @@
                 <button type="button" class="ghost-btn" id="convertCaseBtn"><i data-lucide="arrow-right"></i>售后案例转工单</button>
               </div>
             </form>
+            <aside class="panel case-side-panel">
+              <div class="panel-head">
+                <h3>订单带出信息</h3>
+                <span class="status-pill green">已锁定</span>
+              </div>
+              <div class="side-info-card">
+                <span>订单号</span>
+                <strong id="caseSideOrderNo">SO-20260218-0098</strong>
+                <p id="caseSideAddress">上海市徐汇区虹桥路 88 号 12F</p>
+              </div>
+              <div class="side-info-grid">
+                <article><span>客户</span><strong id="caseSideCustomer">林可</strong></article>
+                <article><span>手机</span><strong id="caseSidePhone">138 0000 9527</strong></article>
+                <article><span>设备</span><strong id="caseSideDevice">Aster X Pro</strong></article>
+                <article><span>权益</span><strong id="caseSideWarranty">保内</strong></article>
+              </div>
+              <div class="side-note">
+                <strong>客服可处理</strong>
+                <p>补充案例类型、问题描述、用户诉求、附件凭证。售后案例可继续确认地址并转服务工单。</p>
+              </div>
+              <div class="side-note muted">
+                <strong>客服不可修改</strong>
+                <p>客户基础资料、订单地址、设备型号、IMEI/SN、购买渠道与权益状态。</p>
+              </div>
+            </aside>
           </div>
         </section>
 
@@ -283,20 +424,23 @@
                 <label>来源编号 / 案例编号
                   <input id="orderSourceRef" value="手工创建" readonly />
                 </label>
+                <label>订单号
+                  <input id="serviceOrderNo" value="SO-20260218-0098" />
+                </label>
                 <label>客户姓名
-                  <input id="orderCustomer" value="林可" />
+                  <input id="orderCustomer" value="林可" readonly />
                 </label>
                 <label>联系电话
-                  <input id="orderPhone" value="138 0000 9527" />
+                  <input id="orderPhone" value="138 0000 9527" readonly />
                 </label>
                 <label>设备型号
-                  <input id="orderDevice" value="Aster X Pro" />
+                  <input id="orderDevice" value="Aster X Pro" readonly />
                 </label>
                 <label>SN / IMEI
-                  <input id="orderDeviceSn" value="AXP2605280098" />
+                  <input id="orderDeviceSn" value="AXP2605280098" readonly />
                 </label>
                 <label>保修状态
-                  <input id="orderWarranty" value="保内" />
+                  <input id="orderWarranty" value="保内" readonly />
                 </label>
                 <label>服务诉求
                   <input id="orderRequest" value="检测维修" />
@@ -356,7 +500,10 @@
                   <input id="estimatedPart" value="电池模组 / USB-C 接口件" />
                 </label>
                 <label class="wide-field">服务地址 / 门店
-                  <input id="serviceAddress" value="上海市徐汇区虹桥路 88 号 12F" />
+                  <input id="serviceAddress" value="上海市徐汇区虹桥路 88 号 12F" readonly />
+                </label>
+                <label class="wide-field">订单带出说明
+                  <input id="orderAutoFillHint" value="输入订单号后自动带出客户基础信息、地址、设备与权益状态，相关字段已锁定。" readonly />
                 </label>
                 <label class="wide-field">工单说明
                   <textarea id="orderDesc">需检测电池健康度、充电接口和快充协议识别状态。</textarea>
@@ -364,7 +511,7 @@
               </div>
               <div class="button-row">
                 <button type="submit" class="primary-btn"><i data-lucide="file-plus-2"></i>创建工单</button>
-                <button type="button" class="ghost-btn" id="goDispatchBtn"><i data-lucide="send"></i>进入派工</button>
+                <button type="button" class="ghost-btn" id="goDispatchBtn"><i data-lucide="send"></i>进入调度</button>
               </div>
             </form>
           </div>
@@ -393,10 +540,95 @@
             <section class="panel">
               <div class="panel-head">
                 <h3>服务工单列表</h3>
-                <span class="status-pill blue">支持查看来源、状态、时效与执行信息</span>
+                <div class="panel-actions">
+                  <span class="status-pill blue">支持查看来源、状态、时效与执行信息</span>
+                  <button class="primary-btn" id="providerDirectOrderBtn"><i data-lucide="file-plus-2"></i>新建工单</button>
+                </div>
               </div>
               <div class="list-summary" id="orderListSummary"></div>
+              <div class="provider-ops-board" aria-label="服务商工单运营看板">
+                <article class="ops-card">
+                  <div>
+                    <span>服务商接单池</span>
+                    <strong>6 单</strong>
+                  </div>
+                  <p>1 单待派工、1 单服务中、4 单已关闭，系统优先提示高优先级与临近预约工单。</p>
+                </article>
+                <article class="ops-card blue">
+                  <div>
+                    <span>履约能力</span>
+                    <strong>92%</strong>
+                  </div>
+                  <p>迅捷服务上海中心备件齐套率 92%，今日容量 12/18，覆盖上海南区、徐汇与静安。</p>
+                </article>
+                <article class="ops-card warn">
+                  <div>
+                    <span>SLA 风险</span>
+                    <strong>1 单</strong>
+                  </div>
+                  <p>WO-260528-001 距预约仅剩 2 小时，建议派工至同区域且具备电池认证的服务人员。</p>
+                </article>
+                <article class="ops-card green">
+                  <div>
+                    <span>服务人员</span>
+                    <strong>12 人</strong>
+                  </div>
+                  <p>今日可派工 12 人，其中 8 人具备高级维修认证，4 人可承接上门急单。</p>
+                </article>
+              </div>
               <div class="record-list" id="orderListPage"></div>
+            </section>
+          </div>
+        </section>
+
+        <section class="view" id="followupsView">
+          <div class="stack-layout">
+            <section class="panel">
+              <div class="panel-head">
+                <h3>回访闭环</h3>
+                <span class="status-pill blue">咨询、投诉与无需转工单案例的客服回访</span>
+              </div>
+              <div class="followup-summary" id="followupSummary"></div>
+              <div class="followup-board">
+                <section>
+                  <div class="section-title-row">
+                    <strong>待回访案例</strong>
+                    <span>回访后可关闭无需转工单的案例</span>
+                  </div>
+                  <div class="record-list" id="followupList"></div>
+                </section>
+                <section class="followup-side">
+                  <div class="section-title-row">
+                    <strong>回访记录</strong>
+                    <span>记录客户确认结果与闭环结论</span>
+                  </div>
+                  <div class="followup-note-card">
+                    <label>回访结果
+                      <select id="followupResult">
+                        <option>客户已认可答复，可关闭</option>
+                        <option>客户仍不满意，继续跟进</option>
+                        <option>需要转服务工单</option>
+                        <option>无法联系，待二次回访</option>
+                      </select>
+                    </label>
+                    <label>回访方式
+                      <select id="followupMethod">
+                        <option>电话回访</option>
+                        <option>App 消息</option>
+                        <option>短信通知</option>
+                        <option>微信服务通知</option>
+                      </select>
+                    </label>
+                    <label>回访摘要
+                      <textarea id="followupNote">已向客户解释处理方案与权益范围，客户认可答复，不需要转服务工单。</textarea>
+                    </label>
+                  </div>
+                  <div class="privacy-note">
+                    <strong>评价查看建议</strong>
+                    <p>客服可查看评价用于回访和服务复盘，但默认展示脱敏姓名与手机号，避免评价内容被过度扩散。</p>
+                  </div>
+                </section>
+              </div>
             </section>
           </div>
         </section>
@@ -405,49 +637,137 @@
           <div class="dispatch-layout">
             <section class="panel">
               <div class="panel-head">
-                <h3>待派工工单</h3>
+                <h3>待调度工单</h3>
                 <span class="status-pill blue" id="selectedOrderLabel">请选择工单</span>
               </div>
               <div class="record-list compact" id="dispatchList"></div>
             </section>
             <section class="panel">
               <div class="panel-head">
-                <h3>派工方式</h3>
+                <h3>派工 / 派单</h3>
+                <span class="status-pill green" id="dispatchModeLabel">派工模式</span>
               </div>
-              <div class="assignment-options">
+              <div class="assignment-options dispatch-main-options">
                 <button class="assign-card active" data-assignment="direct">
                   <i data-lucide="user-check"></i>
-                  <strong>直接派给服务人员</strong>
-                  <span>适合自营服务团队或紧急上门。</span>
+                  <strong>派工</strong>
+                  <span>将工单分配给服务人员，由服务人员联系客户并执行上门或到店服务。</span>
                 </button>
                 <button class="assign-card" data-assignment="provider">
                   <i data-lucide="building-2"></i>
-                  <strong>派给服务商</strong>
-                  <span>服务商接单后再派给服务人员。</span>
+                  <strong>派单</strong>
+                  <span>当客户服务地址变更时，将工单转派给更匹配的服务商承接。</span>
                 </button>
               </div>
-              <div class="form-grid">
-                <label id="providerField">服务商
-                  <select id="providerSelect">
-                    <option>迅捷服务上海中心</option>
-                    <option>星环授权服务商</option>
-                    <option>北区旗舰服务中心</option>
-                  </select>
-                </label>
-                <label>服务人员
-                  <select id="workerSelect">
-                    <option>周明 / 电池与主板</option>
-                    <option>赵雅 / 屏幕与外观</option>
-                    <option>韩川 / 上门综合</option>
-                  </select>
-                </label>
-                <label class="wide-field">派工备注
-                  <textarea id="dispatchNote">请携带电池检测仪、USB-C 接口备件和 65W 充电器。</textarea>
-                </label>
+              <div class="dispatch-step-strip">
+                <span>接单确认</span>
+                <span>匹配服务人员</span>
+                <span>联系客户</span>
+                <span>上门 / 到店执行</span>
               </div>
-              <div class="button-row">
-                <button class="primary-btn" id="dispatchBtn"><i data-lucide="send"></i>确认派工</button>
-                <button class="ghost-btn" id="providerAssignBtn"><i data-lucide="users"></i>服务商二次派工</button>
+              <div class="dispatch-action-panel active" data-dispatch-panel="direct">
+                <div class="section-title-row">
+                  <strong>派工信息</strong>
+                  <span>派工用于分配服务人员</span>
+                </div>
+                <div class="form-grid">
+                  <label id="providerField">当前服务商
+                    <input id="currentProviderName" value="迅捷服务上海中心" readonly />
+                  </label>
+                  <label>服务人员
+                    <select id="workerSelect">
+                      <option>周明 / 电池与主板</option>
+                      <option>赵雅 / 屏幕与外观</option>
+                      <option>韩川 / 上门综合</option>
+                    </select>
+                  </label>
+                  <label class="wide-field">派工备注
+                    <textarea id="dispatchNote">请携带电池检测仪、USB-C 接口备件和 65W 充电器。</textarea>
+                  </label>
+                </div>
+                <div class="auto-dispatch-note" id="autoDispatchNote">
+                  系统将根据工单类型、服务区域、服务资质、当前负载和备件情况推荐服务人员。
+                </div>
+                <div class="button-row">
+                  <button class="ghost-btn" id="autoDispatchBtn" type="button"><i data-lucide="sparkles"></i>自动派工</button>
+                  <button class="primary-btn" id="dispatchBtn"><i data-lucide="send"></i>确认派工</button>
+                </div>
+              </div>
+              <div class="dispatch-action-panel reassign-box" data-dispatch-panel="provider">
+                <div class="section-title-row">
+                  <strong>派单信息</strong>
+                  <span>仅当客户服务地址变更时使用</span>
+                </div>
+                <div class="form-grid">
+                  <label class="wide-field">客户新地址
+                    <input id="reassignAddress" value="上海市徐汇区虹桥路 88 号 12F" />
+                  </label>
+                  <label>推荐服务商
+                    <select id="providerSelect">
+                      <option>迅捷服务上海中心</option>
+                      <option>星环授权服务商</option>
+                      <option>北区旗舰服务中心</option>
+                    </select>
+                  </label>
+                  <label>派单原因
+                    <select id="reassignReason">
+                      <option>客户地址变更</option>
+                      <option>原服务商超出服务范围</option>
+                      <option>客户指定服务网点</option>
+                    </select>
+                  </label>
+                  <label class="wide-field">派单说明
+                    <textarea id="reassignNote">服务人员联系客户后确认服务地址变更，需按新地址重新匹配服务商。</textarea>
+                  </label>
+                </div>
+                <div class="button-row">
+                  <button class="primary-btn" id="providerAssignBtn"><i data-lucide="map-pin"></i>确认派单</button>
+                </div>
+              </div>
+              <div class="dispatch-recommendation">
+                <div class="recommendation-head">
+                  <div>
+                    <span>智能匹配建议</span>
+                    <strong>按工单类型、区域、技能、负载与备件情况推荐</strong>
+                  </div>
+                  <span class="status-pill green">推荐用于调度决策</span>
+                </div>
+                <div class="recommendation-grid">
+                  <article class="recommendation-card preferred">
+                    <div class="recommendation-title">
+                      <strong>周明</strong>
+                      <span>首选服务人员</span>
+                    </div>
+                    <p>电池/主板/快充协议认证，距客户 3.2km，当前负载 3/5，电池模组与 USB-C 接口件可携带。</p>
+                    <div class="match-tags">
+                      <span>技能命中</span>
+                      <span>同区域</span>
+                      <span>备件齐</span>
+                    </div>
+                  </article>
+                  <article class="recommendation-card">
+                    <div class="recommendation-title">
+                      <strong>韩川</strong>
+                      <span>急单候补</span>
+                    </div>
+                    <p>上门综合服务能力强，13:00 后可接急单，适合换货、退货检测和客户安抚类工单。</p>
+                    <div class="match-tags">
+                      <span>可接急单</span>
+                      <span>沟通评分高</span>
+                    </div>
+                  </article>
+                  <article class="recommendation-card">
+                    <div class="recommendation-title">
+                      <strong>迅捷服务上海中心</strong>
+                      <span>推荐服务商</span>
+                    </div>
+                    <p>上海南区覆盖完整，今日剩余容量 6 单，电池、屏幕与接口件库存充足，适合承接批量上门。</p>
+                    <div class="match-tags">
+                      <span>容量充足</span>
+                      <span>库存可用</span>
+                    </div>
+                  </article>
+                </div>
               </div>
             </section>
           </div>
@@ -458,12 +778,12 @@
             <section class="panel">
               <div class="panel-head">
                 <h3>服务员工管理</h3>
-                <span class="status-pill blue">按技能、区域、排班与负载管理工程师</span>
+                <span class="status-pill blue">按技能、区域、排班与负载管理服务人员</span>
               </div>
               <div class="staff-summary">
                 <article class="staff-stat">
                   <strong>18</strong>
-                  <span>在册工程师</span>
+                  <span>在册服务人员</span>
                 </article>
                 <article class="staff-stat green">
                   <strong>12</strong>
@@ -476,6 +796,32 @@
                 <article class="staff-stat blue">
                   <strong>96%</strong>
                   <span>认证覆盖率</span>
+                </article>
+              </div>
+              <div class="provider-capacity-board" aria-label="服务商资源能力">
+                <article class="capacity-card">
+                  <span>服务商能力</span>
+                  <strong>迅捷服务上海中心</strong>
+                  <p>负责上海南区、徐汇、静安区域，支持到店接待、上门维修、换货检测与退货验机。</p>
+                </article>
+                <article class="capacity-card">
+                  <span>今日容量</span>
+                  <strong>12 / 18</strong>
+                  <p>剩余 6 单可分配，建议优先承接高价值客户、预约临近和备件已齐套工单。</p>
+                </article>
+                <article class="capacity-card">
+                  <span>备件库存</span>
+                  <div class="stock-list">
+                    <b>电池模组 26</b>
+                    <b>屏幕组件 18</b>
+                    <b>USB-C 接口件 9</b>
+                  </div>
+                  <p>库存可与工单预估备件联动，避免服务人员到场后缺件。</p>
+                </article>
+                <article class="capacity-card">
+                  <span>排班提醒</span>
+                  <strong>2 人需关注</strong>
+                  <p>赵雅当前满载，沈临仍在认证中，复杂维修建议由高级服务人员复核。</p>
                 </article>
               </div>
               <div class="staff-toolbar">
@@ -505,7 +851,7 @@
                 <article class="staff-row">
                   <div class="staff-person">
                     <b>周明</b>
-                    <span>SE-021 · 高级工程师</span>
+                    <span>SE-021 · 高级服务人员</span>
                   </div>
                   <div class="staff-skills">
                     <span>电池</span>
@@ -599,7 +945,7 @@
             <section class="panel">
               <div class="panel-head">
                 <h3>服务执行列表</h3>
-                <span class="status-pill warn">工程师待处理派单</span>
+                <span class="status-pill warn">服务人员待处理工单</span>
               </div>
               <div class="list-summary" id="executionSummary"></div>
               <div class="execution-table-head">
@@ -622,162 +968,207 @@
                 <h3>服务执行详情</h3>
                 <span class="status-pill warn" id="executionDetailLabel">现场处理中</span>
               </div>
-              <div class="form-grid">
-                <div class="form-section-title wide-field">
-                  <strong>到场与设备核验</strong>
-                  <span>确认设备、外观、数据与服务条件</span>
+              <div class="service-guide">
+                <article class="guide-step active" data-guide-step="verify"><strong>1. 实机核验</strong><span>扫码确认 IMEI 一致</span></article>
+                <article class="guide-step" data-guide-step="diagnosis"><strong>2. 检测故障</strong><span>可记录多项故障</span></article>
+                <article class="guide-step" data-guide-step="repair"><strong>3. 维修方案</strong><span>每项故障对应处理方案</span></article>
+                <article class="guide-step" data-guide-step="parts"><strong>4. 备件申请</strong><span>支持多项备件</span></article>
+                <article class="guide-step" data-guide-step="finish"><strong>5. 完工回传</strong><span>照片、质检与客户确认</span></article>
+              </div>
+              <div class="service-tabs">
+                <button type="button" class="active" data-service-tab="verify">实机核验</button>
+                <button type="button" data-service-tab="diagnosis" disabled>检测故障</button>
+                <button type="button" data-service-tab="repair" disabled>维修方案</button>
+                <button type="button" data-service-tab="parts" disabled>备件申请</button>
+                <button type="button" data-service-tab="finish" disabled>完工回传</button>
+              </div>
+              <div class="service-tab-panel active" data-service-panel="verify">
+                <div class="form-grid">
+                  <div class="form-section-title wide-field">
+                    <strong>扫码核验</strong>
+                    <span>先扫描实机 IMEI / SN，确认与服务单一致后才能继续服务</span>
+                  </div>
+                  <label>服务单 IMEI / SN
+                    <input id="expectedImei" value="AXP2605280098" readonly />
+                  </label>
+                  <label>扫码录入 IMEI / SN
+                    <input id="scanImei" value="AXP2605280098" />
+                  </label>
+                  <label>到场时间
+                    <input id="arrivalTime" value="2026-05-28 16:05" />
+                  </label>
+                  <label>设备外观状态
+                    <select id="appearanceStatus">
+                      <option>外观完好</option>
+                      <option>轻微划痕</option>
+                      <option>屏幕破损</option>
+                      <option>机身变形</option>
+                      <option>疑似进液</option>
+                    </select>
+                  </label>
+                  <label>数据备份确认
+                    <select id="dataBackupConfirm">
+                      <option>客户确认已备份</option>
+                      <option>已协助完成备份</option>
+                      <option>客户放弃备份</option>
+                      <option>无需保留数据</option>
+                    </select>
+                  </label>
+                  <label>保修判定
+                    <select id="warrantyDecision">
+                      <option>保内免费</option>
+                      <option>延保覆盖</option>
+                      <option>人为损坏待判责</option>
+                      <option>保外收费</option>
+                    </select>
+                  </label>
+                  <div class="wide-field imei-result" id="imeiVerifyResult">待扫码核验，核验通过后开放后续服务步骤。</div>
                 </div>
-                <label>到场时间
-                  <input id="arrivalTime" value="2026-05-28 16:05" />
-                </label>
-                <label>设备外观状态
-                  <select id="appearanceStatus">
-                    <option>外观完好</option>
-                    <option>轻微划痕</option>
-                    <option>屏幕破损</option>
-                    <option>机身变形</option>
-                    <option>疑似进液</option>
-                  </select>
-                </label>
-                <label>数据备份确认
-                  <select id="dataBackupConfirm">
-                    <option>客户确认已备份</option>
-                    <option>已协助完成备份</option>
-                    <option>客户放弃备份</option>
-                    <option>无需保留数据</option>
-                  </select>
-                </label>
-                <label>保修判定
-                  <select id="warrantyDecision">
-                    <option>保内免费</option>
-                    <option>延保覆盖</option>
-                    <option>人为损坏待判责</option>
-                    <option>保外收费</option>
-                  </select>
-                </label>
-                <div class="form-section-title wide-field">
-                  <strong>检测与诊断</strong>
-                  <span>记录故障、检测结论和根因判断</span>
+                <div class="button-row">
+                  <button type="button" class="primary-btn" id="verifyImeiBtn"><i data-lucide="scan-line"></i>核验并开始服务</button>
                 </div>
-                <label>故障现象
-                  <select id="faultType">
-                    <option>充电慢 / 发热</option>
-                    <option>无法开机</option>
-                    <option>屏幕异常</option>
-                    <option>网络异常</option>
-                  </select>
-                </label>
-                <label>检测结果
-                  <select id="diagnosis">
-                    <option>电池健康度低于阈值</option>
-                    <option>接口进液腐蚀</option>
-                    <option>主板电源模块异常</option>
-                    <option>未复现故障</option>
-                  </select>
-                </label>
-                <label>根因判断
-                  <select id="rootCause">
-                    <option>电池老化</option>
-                    <option>接口接触不良</option>
-                    <option>屏幕模组异常</option>
-                    <option>软件版本异常</option>
-                    <option>主板器件异常</option>
-                    <option>人为损伤</option>
-                  </select>
-                </label>
-                <label>检测工具 / 读数
-                  <input id="testReading" value="电池健康度 72%，快充握手失败 2 次" />
-                </label>
-                <label class="wide-field">检测说明
-                  <textarea id="diagnosisNote">完成外观检查、充电协议检测、电池健康度读取和温控压力测试。</textarea>
-                </label>
-                <div class="form-section-title wide-field">
-                  <strong>维修处理</strong>
-                  <span>记录维修动作、备件、费用和照片凭证</span>
+              </div>
+              <div class="service-tab-panel" data-service-panel="diagnosis">
+                <div class="form-grid">
+                  <div class="form-section-title wide-field">
+                    <strong>检测故障</strong>
+                    <span>支持填写多项故障，每行一项，后续需逐项给出处理方案</span>
+                  </div>
+                  <label class="wide-field">故障清单
+                    <textarea id="faultItems">1. 充电慢 / 发热：电池健康度 72%，快充握手失败 2 次。
+2. USB-C 接口识别不稳定：线缆晃动后充电中断。</textarea>
+                  </label>
+                  <label>检测工具 / 读数
+                    <input id="testReading" value="电池健康度 72%，快充握手失败 2 次；接口压降异常" />
+                  </label>
+                  <label>根因判断
+                    <select id="rootCause">
+                      <option>电池老化 + 接口接触不良</option>
+                      <option>接口进液腐蚀</option>
+                      <option>主板电源模块异常</option>
+                      <option>软件版本异常</option>
+                      <option>人为损伤</option>
+                      <option>日常损耗 / 积尘</option>
+                    </select>
+                  </label>
+                  <label class="wide-field">检测说明
+                    <textarea id="diagnosisNote">完成外观检查、充电协议检测、电池健康度读取、接口晃动测试和温控压力测试。</textarea>
+                  </label>
                 </div>
-                <label>维修动作
-                  <select id="repairAction">
-                    <option>更换备件</option>
-                    <option>清洁保养</option>
-                    <option>软件升级 / 重置</option>
-                    <option>整机换货</option>
-                    <option>退货检测</option>
-                    <option>未维修，仅解释说明</option>
-                  </select>
-                </label>
-                <label>备件名称
-                  <input id="partName" value="Aster X Pro 电池模组" />
-                </label>
-                <label>备件编码
-                  <input id="partCode" value="BAT-AXP-5000" />
-                </label>
-                <label>备件批次 / 序列号
-                  <input id="partSerial" value="SN-BAT-260528-8891" />
-                </label>
-                <label>数量
-                  <input id="partQty" type="number" value="1" min="0" />
-                </label>
-                <label>旧件处理
-                  <select id="oldPartHandling">
-                    <option>旧件回收</option>
-                    <option>客户带回</option>
-                    <option>无需旧件</option>
-                    <option>待仓库确认</option>
-                  </select>
-                </label>
-                <label>费用
-                  <input id="fee" value="保内免费" />
-                </label>
-                <label>支付 / 结算状态
-                  <select id="paymentStatus">
-                    <option>无需支付</option>
-                    <option>客户已支付</option>
-                    <option>待客户支付</option>
-                    <option>服务商月结</option>
-                  </select>
-                </label>
-                <label class="wide-field">服务照片 / 凭证
-                  <textarea id="servicePhotos">到场定位照片、设备外观照片、故障检测截图、备件更换前后照片、完工测试照片。</textarea>
-                </label>
-                <label class="wide-field">处理说明
-                  <textarea id="serviceNote">已更换电池模组并完成充电压力测试，温控恢复正常。</textarea>
-                </label>
-                <div class="form-section-title wide-field">
-                  <strong>质检与客户确认</strong>
-                  <span>完工测试、客户验收和后续提醒</span>
+              </div>
+              <div class="service-tab-panel" data-service-panel="repair">
+                <div class="form-grid">
+                  <div class="form-section-title wide-field">
+                    <strong>维修方案</strong>
+                    <span>每一项故障都需要对应处理方案，便于客户确认和后续质检</span>
+                  </div>
+                  <label class="wide-field">故障处理方案
+                    <textarea id="repairPlanItems">1. 充电慢 / 发热：更换电池模组，完成快充协议和温控压力测试。
+2. USB-C 接口识别不稳定：更换 USB-C 接口件，完成插拔和充电稳定性测试。</textarea>
+                  </label>
+                  <label>维修动作
+                    <select id="repairAction">
+                      <option>更换备件</option>
+                      <option>清洁保养</option>
+                      <option>软件升级 / 重置</option>
+                      <option>整机换货</option>
+                      <option>退货检测</option>
+                      <option>未维修，仅解释说明</option>
+                    </select>
+                  </label>
+                  <label>费用
+                    <input id="fee" value="保内免费" />
+                  </label>
+                  <label>支付 / 结算状态
+                    <select id="paymentStatus">
+                      <option>无需支付</option>
+                      <option>客户已支付</option>
+                      <option>待客户支付</option>
+                      <option>服务商月结</option>
+                    </select>
+                  </label>
+                  <label class="wide-field">客户确认说明
+                    <textarea id="serviceNote">已向客户说明检测结论、维修方案、预计耗时和数据风险，客户同意继续维修。</textarea>
+                  </label>
                 </div>
-                <label>完工测试
-                  <select id="qualityCheck">
-                    <option>充电 / 开机 / 联网测试通过</option>
-                    <option>屏幕触控测试通过</option>
-                    <option>整机功能测试通过</option>
-                    <option>需二次检测</option>
-                  </select>
-                </label>
-                <label>客户确认
-                  <select id="customerConfirm">
-                    <option>客户现场确认完成</option>
-                    <option>客户远程确认完成</option>
-                    <option>客户待确认</option>
-                    <option>客户有异议</option>
-                  </select>
-                </label>
-                <label>服务结果
-                  <select id="serviceResult">
-                    <option>已修复</option>
-                    <option>已换货</option>
-                    <option>已退货</option>
-                    <option>未复现</option>
-                    <option>需返厂</option>
-                  </select>
-                </label>
-                <label>后续提醒
-                  <input id="followUpReminder" value="24 小时后回访充电温度与续航表现" />
-                </label>
+              </div>
+              <div class="service-tab-panel" data-service-panel="parts">
+                <div class="form-grid">
+                  <div class="form-section-title wide-field">
+                    <strong>备件申请</strong>
+                    <span>如需更换备件，可一次录入多项备件申请</span>
+                  </div>
+                  <label class="wide-field">备件申请清单
+                    <textarea id="partRequests">1. Aster X Pro 电池模组 / BAT-AXP-5000 / 数量 1 / 旧件回收。
+2. USB-C 接口件 / USB-C-AXP-018 / 数量 1 / 旧件回收。</textarea>
+                  </label>
+                  <label>备件名称
+                    <input id="partName" value="Aster X Pro 电池模组；USB-C 接口件" />
+                  </label>
+                  <label>备件编码
+                    <input id="partCode" value="BAT-AXP-5000；USB-C-AXP-018" />
+                  </label>
+                  <label>备件批次 / 序列号
+                    <input id="partSerial" value="SN-BAT-260528-8891；SN-USBC-260528-2077" />
+                  </label>
+                  <label>数量
+                    <input id="partQty" type="number" value="2" min="0" />
+                  </label>
+                  <label>旧件处理
+                    <select id="oldPartHandling">
+                      <option>旧件回收</option>
+                      <option>客户带回</option>
+                      <option>无需旧件</option>
+                      <option>待仓库确认</option>
+                    </select>
+                  </label>
+                </div>
+              </div>
+              <div class="service-tab-panel" data-service-panel="finish">
+                <div class="form-grid">
+                  <div class="form-section-title wide-field">
+                    <strong>完工回传</strong>
+                    <span>上传照片凭证、完成质检、客户确认后关闭工单</span>
+                  </div>
+                  <label class="wide-field">服务照片 / 凭证
+                    <textarea id="servicePhotos">到场定位照片、设备外观照片、扫码核验截图、故障检测截图、备件更换前后照片、完工测试照片。</textarea>
+                  </label>
+                  <label>完工测试
+                    <select id="qualityCheck">
+                      <option>充电 / 开机 / 联网测试通过</option>
+                      <option>屏幕触控测试通过</option>
+                      <option>整机功能测试通过</option>
+                      <option>需二次检测</option>
+                    </select>
+                  </label>
+                  <label>客户确认
+                    <select id="customerConfirm">
+                      <option>客户现场确认完成</option>
+                      <option>客户远程确认完成</option>
+                      <option>客户待确认</option>
+                      <option>客户有异议</option>
+                    </select>
+                  </label>
+                  <label>服务结果
+                    <select id="serviceResult">
+                      <option>已修复</option>
+                      <option>已换货</option>
+                      <option>已退货</option>
+                      <option>已保养</option>
+                      <option>未复现</option>
+                      <option>需返厂</option>
+                    </select>
+                  </label>
+                  <label>后续提醒
+                    <input id="followUpReminder" value="24 小时后回访充电温度与续航表现" />
+                  </label>
+                </div>
+                <div class="button-row finish-actions">
+                  <button type="button" class="primary-btn" id="closeOrderBtn"><i data-lucide="circle-check"></i>完成并关闭工单</button>
+                </div>
               </div>
               <div class="button-row">
                 <button type="submit" class="primary-btn"><i data-lucide="package-plus"></i>保存服务记录</button>
-                <button type="button" class="ghost-btn" id="closeOrderBtn"><i data-lucide="circle-check"></i>完成并关闭工单</button>
               </div>
             </form>
           </div>
@@ -787,8 +1178,8 @@
           <div class="stack-layout review-only-layout">
             <section class="panel review-panel">
               <div class="panel-head">
-                <h3>用户评价</h3>
-                <span class="status-pill green">服务闭环</span>
+                <h3 id="reviewPanelTitle">用户评价</h3>
+                <span class="status-pill green" id="reviewPanelTag">服务闭环</span>
               </div>
               <div class="review-summary" id="reviewSummary"></div>
               <div class="review-feature">
@@ -811,10 +1202,236 @@
             </section>
           </div>
         </section>
+
+        <section class="view" id="knowledgeView">
+          <div class="knowledge-layout">
+            <section class="panel">
+              <div class="panel-head">
+                <div>
+                  <h3>高频问题知识库</h3>
+                  <p>按用户来电咨询频次排序，客服可快速查找统一答复口径。</p>
+                </div>
+                <span class="status-pill blue">按热度排序</span>
+              </div>
+              <div class="knowledge-summary" id="knowledgeSummary"></div>
+              <div class="knowledge-list" id="knowledgeList"></div>
+            </section>
+            <aside class="panel knowledge-side-panel">
+              <div class="panel-head">
+                <h3>知识库使用建议</h3>
+                <span class="status-pill green">客服辅助</span>
+              </div>
+              <div class="side-note">
+                <strong>先查标准口径</strong>
+                <p>优先使用知识库推荐话术，避免客服之间答复不一致。</p>
+              </div>
+              <div class="side-note">
+                <strong>再结合客户信息</strong>
+                <p>涉及权益、订单、地址和工单进度时，应结合客户订单和案例详情确认。</p>
+              </div>
+              <div class="side-note muted">
+                <strong>需要升级的情况</strong>
+                <p>价格争议、投诉升级、退款异常、多次维修未解决，应记录案例并安排回访。</p>
+              </div>
+            </aside>
+          </div>
+        </section>
       </section>
     </main>
 
+    <aside class="knowledge-bot-panel hidden" id="knowledgeBotPanel" aria-label="AI 知识库助手">
+      <div class="knowledge-bot-head">
+        <div>
+          <span>AI 知识库助手</span>
+          <strong>输入客户问题，生成客服回答话术</strong>
+        </div>
+        <button class="icon-btn" id="knowledgeBotClose" aria-label="关闭 AI 知识库助手">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+      <label>客户问题
+        <textarea id="knowledgeQuestion">手机充电发热，保内可以免费维修吗？</textarea>
+      </label>
+      <div class="button-row">
+        <button class="primary-btn" id="knowledgeAskBtn"><i data-lucide="sparkles"></i>AI 查询知识库</button>
+        <button class="ghost-btn" id="knowledgeOpenBtn"><i data-lucide="book-open-text"></i>打开知识库</button>
+      </div>
+      <div class="knowledge-answer-card">
+        <span id="knowledgeMatchLabel">推荐回答</span>
+        <p id="knowledgeAnswer">请先输入客户问题，AI 会结合高频知识库给出适合客服直接使用的回答语句。</p>
+      </div>
+      <div class="knowledge-answer-tags" id="knowledgeAnswerTags"></div>
+    </aside>
+    <button class="knowledge-bot-tab hidden" id="knowledgeBotTab" aria-label="打开 AI 知识库助手">
+      <span>客</span>
+      <strong>AI知识库</strong>
+    </button>
+
+    <aside class="call-drawer" id="callDrawer" aria-label="服务热线接听窗口">
+      <div class="call-drawer-head">
+        <div>
+          <span>服务热线接入</span>
+          <strong>400-820-0528</strong>
+        </div>
+        <button class="icon-btn" id="callDrawerClose" aria-label="关闭热线窗口">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+      <div class="call-status-card">
+        <div class="call-pulse">
+          <i data-lucide="phone-call"></i>
+        </div>
+        <div>
+          <span>来电中 · 售后服务</span>
+          <strong>林可 / 138 0000 9527</strong>
+          <p>Aster X Pro · 充电慢 / 发热 · 已识别高价值用户</p>
+        </div>
+      </div>
+      <div class="call-actions">
+        <button class="primary-btn" id="answerCallBtn"><i data-lucide="phone"></i>接听</button>
+        <button class="ghost-btn" id="holdCallBtn"><i data-lucide="pause"></i>保持</button>
+        <button class="ghost-btn" id="endCallBtn"><i data-lucide="phone-off"></i>挂断</button>
+      </div>
+      <div class="call-info-grid">
+        <article>
+          <span>客户等级</span>
+          <strong>高价值用户</strong>
+        </article>
+        <article>
+          <span>最近案例</span>
+          <strong>CS-260528-101</strong>
+        </article>
+        <article>
+          <span>权益状态</span>
+          <strong>保内免费</strong>
+        </article>
+        <article>
+          <span>建议动作</span>
+          <strong>转服务工单</strong>
+        </article>
+      </div>
+      <label class="call-note">通话记录
+        <textarea id="callNote">客户反馈充电发热明显，满电耗时过长。已核验 SN，建议创建售后案例并转服务工单。</textarea>
+      </label>
+      <section class="ai-assist-panel">
+        <div class="ai-assist-head">
+          <div>
+            <span>AI 接线助手</span>
+            <strong>实时识别诉求并生成处理建议</strong>
+          </div>
+          <button class="mini-btn" id="aiAnalyzeBtn">AI 分析通话</button>
+        </div>
+        <div class="ai-summary-card">
+          <span>AI 摘要</span>
+          <p id="aiSummary">客户反馈 Aster X Pro 充电发热且充满耗时过长，设备保内，建议创建售后案例并转维修工单。</p>
+        </div>
+        <div class="ai-chip-grid" id="aiIntentChips">
+          <span>售后</span>
+          <span>电池 / 充电</span>
+          <span>高价值用户</span>
+          <span>建议上门维修</span>
+        </div>
+        <div class="ai-next-step">
+          <span>AI 推荐下一步</span>
+          <ol>
+            <li>核验 SN / IMEI 与保修权益。</li>
+            <li>创建售后案例，问题分类选择“电池 / 充电”。</li>
+            <li>转服务工单，建议上门维修，预估备件为电池模组 / USB-C 接口件。</li>
+          </ol>
+        </div>
+        <div class="ai-draft">
+          <span>AI 案例草稿</span>
+          <textarea id="aiCaseDraft">客户来电反馈手机充电发热明显，充满电耗时约 3 小时。已初步核验设备为 Aster X Pro，权益状态保内，客户诉求为检测维修。建议创建售后案例并安排上门服务。</textarea>
+        </div>
+        <div class="ai-quality">
+          <span>AI 质检提醒</span>
+          <div>
+            <b>已确认客户身份</b>
+            <b>已核验设备权益</b>
+            <b class="warn">需补充客户期望上门时间</b>
+          </div>
+        </div>
+        <div class="ai-actions">
+          <button class="primary-btn" id="applyAiDraftBtn"><i data-lucide="sparkles"></i>生成案例草稿</button>
+          <button class="ghost-btn" id="copyAiSummaryBtn"><i data-lucide="clipboard-copy"></i>复制摘要</button>
+        </div>
+      </section>
+      <div class="call-shortcuts">
+        <button class="mini-btn" data-call-jump="cases">新建案例</button>
+        <button class="mini-btn" data-call-jump="casesList">查看案例</button>
+        <button class="mini-btn" data-call-jump="ordersList">关联工单</button>
+      </div>
+    </aside>
+    <button class="call-drawer-tab hidden" id="callDrawerTab">
+      <i data-lucide="headphones"></i>
+      热线
+    </button>
+
+    <div class="modal-backdrop hidden" id="convertModal" role="dialog" aria-modal="true" aria-labelledby="convertModalTitle">
+      <section class="modal-card">
+        <div class="panel-head">
+          <div>
+            <h3 id="convertModalTitle">确认转服务工单</h3>
+            <p>请与客户二次确认服务地址，系统会按地址推荐最近服务商。</p>
+          </div>
+          <button class="icon-btn" id="convertModalClose" aria-label="关闭转工单确认">
+            <i data-lucide="x"></i>
+          </button>
+        </div>
+        <div class="form-grid">
+          <label>客户姓名
+            <input id="convertCustomer" readonly />
+          </label>
+          <label>联系电话
+            <input id="convertPhone" readonly />
+          </label>
+          <label class="wide-field">确认服务地址
+            <input id="convertAddress" />
+          </label>
+          <label>推荐服务商
+            <input id="convertProvider" readonly />
+          </label>
+          <label>服务区域
+            <input id="convertRegion" readonly />
+          </label>
+          <label>服务方式
+            <select id="convertMode">
+              <option>上门服务</option>
+              <option>到店服务</option>
+              <option>寄修服务</option>
+            </select>
+          </label>
+          <label>服务类型
+            <select id="convertType">
+              <option>维修</option>
+              <option>换货</option>
+              <option>保养</option>
+              <option>退货</option>
+            </select>
+          </label>
+          <label>预约时间
+            <input id="convertAppointment" value="2026-05-29 10:00" />
+          </label>
+          <label>预约时段
+            <select id="convertTimeSlot">
+              <option>09:00 - 12:00</option>
+              <option selected>13:00 - 18:00</option>
+              <option>18:00 - 21:00</option>
+            </select>
+          </label>
+        </div>
+        <div class="convert-provider-note">
+          <strong id="convertProviderReason">已按客户地址推荐最近服务商。</strong>
+          <span>地址修改后会自动刷新推荐结果。</span>
+        </div>
+        <div class="button-row modal-actions">
+          <button type="button" class="ghost-btn" id="cancelConvertBtn">取消</button>
+          <button type="button" class="primary-btn" id="confirmConvertBtn"><i data-lucide="arrow-right"></i>确认转工单</button>
+        </div>
+      </section>
+    </div>
+
     <div class="toast" id="toast" role="status"></div>
-    <script src="./script.js"></script>
+    <script src="./script.js?v=20260614-auto-dispatch"></script>
   </body>
 </html>
